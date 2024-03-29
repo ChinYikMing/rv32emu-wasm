@@ -582,3 +582,5 @@ void rv_profile(riscv_t *rv, char *out_file_path)
     }
 #endif
 }
+
+// test
