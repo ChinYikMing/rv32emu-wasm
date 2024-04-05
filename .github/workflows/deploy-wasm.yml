@@ -56,7 +56,6 @@ jobs:
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.RV32EMU_DEMO_TOKEN }}
           fetch-depth: 0
           repository: ChinYikMing/rv32emu-demo
       - name: Create local changes
