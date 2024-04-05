@@ -56,8 +56,6 @@ jobs:
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           repository: ChinYikMing/rv32emu-demo
-          ref: main
-          fetch-depth: 0
       - name: Create local changes
         if: ${{ steps.changed-files.outputs.any_changed == 'true' ||
             github.event_name == 'workflow_dispatch'}}
@@ -81,6 +79,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           repository: ChinYikMing/rv32emu-demo
-          github_token: ${{ secrets.RV32EMU_DEMO_TOKEN }}
           branch: main
-          force_with_lease: true
