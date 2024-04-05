@@ -55,8 +55,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
           repository: ChinYikMing/rv32emu-demo
       - name: Create local changes
         if: ${{ steps.changed-files.outputs.any_changed == 'true' ||
