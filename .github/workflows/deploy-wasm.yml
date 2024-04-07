@@ -24,6 +24,7 @@ jobs:
           files: |
               assets/html/index.html
               assets/js/pre.js
+              build/doom.elf
               build/*.{elf}
       - name: install emcc
         if: ${{ steps.changed-files.outputs.any_modified == 'true' ||
