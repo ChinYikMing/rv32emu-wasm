@@ -24,6 +24,7 @@ jobs:
           files: |
               assets/html/index.html
               assets/js/pre.js
+              build/*.{elf}
       - name: install emcc
         if: ${{ steps.changed-files.outputs.any_changed == 'true' ||
             github.event_name == 'workflow_dispatch'}}
