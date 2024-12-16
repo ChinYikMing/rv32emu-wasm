@@ -47,7 +47,7 @@ void u8250_check_ready(u8250_state_t *uart)
 static void u8250_handle_out(u8250_state_t *uart, uint8_t value)
 {
     if (write(uart->out_fd, &value, 1) < 1)
-        fprintf(stderr, "failed to write UART output: %s\n", strerror(errno));
+        rv_log_error("failed to write UART output: %s", strerror(errno));
 }
 
 static uint8_t u8250_handle_in(u8250_state_t *uart)
@@ -58,7 +58,7 @@ static uint8_t u8250_handle_in(u8250_state_t *uart)
         return value;
 
     if (read(uart->in_fd, &value, 1) < 0)
-        fprintf(stderr, "failed to read UART input: %s\n", strerror(errno));
+        rv_log_error("failed to read UART output: %s", strerror(errno));
     uart->in_ready = false;
     u8250_check_ready(uart);
 

@@ -516,9 +516,6 @@ typedef struct {
     /* emulation program error code */
     int error;
 
-    /* TODO: for logging feature */
-    int log_level;
-
     /* userspace or system emulation data */
     vm_data_t data;
 

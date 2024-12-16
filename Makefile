@@ -301,6 +301,7 @@ OBJS := \
 	syscall.o \
 	emulate.o \
 	riscv.o \
+	log.o \
 	elf.o \
 	cache.o \
 	mpool.o \

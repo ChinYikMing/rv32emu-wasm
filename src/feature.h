@@ -108,5 +108,15 @@
 #define RV32_FEATURE_BLOCK_CHAINING 1
 #endif
 
+/* Logging use color */
+#ifndef RV32_FEATURE_LOG_COLOR
+#define RV32_FEATURE_LOG_COLOR 1
+#endif
+
+/* Logging callback */
+#ifndef RV32_FEATURE_LOG_CALLBACK
+#define RV32_FEATURE_LOG_CALLBACK 0
+#endif
+
 /* Feature test macro */
 #define RV32_HAS(x) RV32_FEATURE_##x
