@@ -278,6 +278,7 @@ int main(int argc, char **args)
         attr.exit_code = 1;
         goto end;
     }
+    rv_log_info("RISC-V emulator is created successfully and ready to run");
 
     rv_run(rv);
 
@@ -291,6 +292,7 @@ int main(int argc, char **args)
 
     /* finalize the RISC-V runtime */
     rv_delete(rv);
+    rv_log_info("RISC-V emulator is destroyed successfully");
 
     rv_log_info("inferior exit code %d", attr.exit_code);
 
