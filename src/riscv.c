@@ -259,6 +259,14 @@ fail:
     exit(EXIT_FAILURE);
 }
 
+static void load_dtb(char **ram_loc)
+{
+#include "minimal_dtb.h"
+    memcpy(*ram_loc, minimal, sizeof(minimal));
+    *ram_loc += sizeof(minimal);
+    return;
+}
+
 /*
  * The control mode flag for keyboard.
  *
@@ -294,6 +302,7 @@ static void capture_keyboard_input()
     term.c_lflag &= ~TERMIOS_C_CFLAG;
     tcsetattr(0, TCSANOW, &term);
 }
+
 #endif
 
 /*
@@ -410,6 +419,8 @@ riscv_t *rv_create(riscv_user_t rv_attr)
     uint32_t dtb_addr = attr->mem->mem_size - (1 * 1024 * 1024);
     ram_loc = ((char *) attr->mem->mem_base) + dtb_addr;
     map_file(&ram_loc, attr->data.system.dtb);
+    load_dtb(&ram_loc);
+    rv_log_info("DTB loaded");
     /*
      * Load optional initrd image at last 8 MiB before the dtb region to
      * prevent kernel from overwritting it
@@ -517,8 +528,7 @@ void rv_run(riscv_t *rv)
     vm_attr_t *attr = PRIV(rv);
     assert(attr &&
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
-           attr->data.system.kernel && attr->data.system.initrd &&
-           attr->data.system.dtb
+           attr->data.system.kernel && attr->data.system.initrd
 #else
            attr->data.user.elf_program
 #endif
