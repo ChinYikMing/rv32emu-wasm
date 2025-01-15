@@ -155,7 +155,7 @@ static SDL_Texture *texture;
 
 /* Event queue specific variables */
 static uint32_t queues_capacity;
-static uint32_t event_count_addr;
+static uint32_t event_count_vaddr;
 static uint32_t deferred_submissions = 0;
 static event_queue_t event_queue = {
     .base = 0,
@@ -175,6 +175,7 @@ static submission_t submission_pop(riscv_t *rv)
         sizeof(submission_t));
     ++submission_queue.start;
     submission_queue.start &= queues_capacity - 1;
+    assert(submission.type == 0 || submission.type == 1);
     return submission;
 }
 
@@ -185,17 +186,10 @@ static void event_push(riscv_t *rv, event_t event)
     ++event_queue.end;
     event_queue.end &= queues_capacity - 1;
 
-    uint32_t addr = event_count_addr;
-
-#if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
-    addr = rv->io.mem_trans(rv, event_count_addr, R);
-    assert(addr);
-#endif
-
     uint32_t count;
-    rv->io.mem_read(rv, (void *) &count, addr, sizeof(uint32_t));
+    count = rv->io.mem_read_w(rv, event_count_vaddr);
     count += 1;
-    rv->io.mem_write(rv, addr, (void *) &count, sizeof(uint32_t));
+    rv->io.mem_write_w(rv, event_count_vaddr, count);
 }
 
 static inline uint32_t round_pow2(uint32_t x)
@@ -260,6 +254,7 @@ static bool check_sdl(riscv_t *rv, int width, int height)
             } else {
                 printf("no window\n");
             }
+            SDL_DestroyWindow(window);
             return false;
         }
         case SDL_KEYDOWN:
@@ -364,9 +359,10 @@ void syscall_draw_frame(riscv_t *rv)
 
 void syscall_setup_queue(riscv_t *rv)
 {
-    /* the guestOS might exit and execute the SDL-based program again
+    /*
+     * The guestOS might exit and execute the SDL-based program again
      * thus clearing the queue and window are required to avoid using the
-     * access the old events and window
+     * access the old events and window.
      */
     event_queue.base = event_queue.end = 0;
     submission_queue.base = submission_queue.start = 0;
@@ -378,16 +374,22 @@ void syscall_setup_queue(riscv_t *rv)
     /* setup_queue(base, capacity, event_count) */
     uint32_t base = rv_get_reg(rv, rv_reg_a0);
     queues_capacity = rv_get_reg(rv, rv_reg_a1);
-    event_count_addr = rv_get_reg(rv, rv_reg_a2);
+    event_count_vaddr = rv_get_reg(rv, rv_reg_a2);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+    uint32_t sub_addr =
+        rv->io.mem_trans(rv, base + sizeof(event_t) * queues_capacity, R);
+    assert(sub_addr);
+
     uint32_t addr = rv->io.mem_trans(rv, base, R);
     assert(addr);
     base = addr;
+
+    /* now the base is the gPA and host can access directly */
 #endif
 
     event_queue.base = base;
-    submission_queue.base = base + sizeof(event_t) * queues_capacity;
+    submission_queue.base = sub_addr;
     queues_capacity = round_pow2(queues_capacity);
 }
 
@@ -418,8 +420,11 @@ void syscall_submit_queue(riscv_t *rv)
                 return;
 
             strcpy(title, "rv32emu");
-            rv->io.mem_read(rv, (uint8_t *) title, submission.title.title,
-                            submission.title.size);
+
+            /* submission.title.title is virtual memory */
+            uint32_t addr = rv->io.mem_trans(rv, submission.title.title, R);
+            assert(addr);
+            rv->io.mem_read(rv, (uint8_t *) title, addr, submission.title.size);
             title[submission.title.size] = 0;
 
             SDL_SetWindowTitle(window, title);
@@ -921,12 +926,23 @@ static void init_audio(void)
 
 static void shutdown_audio(riscv_t *rv)
 {
+
+    /*
+     * To avoid main thread exit before them
+     * since they might access invalid memory
+     */
+    pthread_join(sfx_thread, NULL);
+    pthread_join(music_thread, NULL);
+
     stop_music(rv);
     Mix_HaltChannel(-1);
     Mix_CloseAudio();
     Mix_Quit();
+
     free(music_midi_data);
+    music_midi_data = NULL;
     free(sfx_samples);
+    sfx_samples = NULL;
 }
 
 void syscall_setup_audio(riscv_t *rv)

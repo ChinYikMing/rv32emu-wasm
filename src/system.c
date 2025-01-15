@@ -404,7 +404,7 @@ static void mmu_write_b(riscv_t *rv, const uint32_t vaddr, const uint8_t val)
 #endif
 }
 
-static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, int rw)
+static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
 {
     if (!rv->csr_satp)
         return vaddr;
