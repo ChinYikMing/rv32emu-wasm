@@ -1129,6 +1129,7 @@ void rv_step_debug(void *arg)
 
 retranslate:
     rv_insn_t ir;
+
     memset(&ir, 0, sizeof(rv_insn_t));
 
     /* fetch the next instruction */
