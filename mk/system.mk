@@ -6,7 +6,7 @@ DEV_SRC := src/devices
 DTC ?= dtc
 $(OUT)/minimal.dtb: $(DEV_SRC)/minimal.dts
 	$(VECHO) " DTC\t$@\n"
-	$(Q)$(DTC) $^ -o $@
+	$(Q)$(CC) -nostdinc -E -P -x assembler-with-cpp -undef $(CFLAGS_dt) $^ | $(DTC) - > $@
 BUILD_DTB := $(OUT)/minimal.dtb
 
 $(DEV_OUT)/%.o: $(DEV_SRC)/%.c $(deps_emcc)

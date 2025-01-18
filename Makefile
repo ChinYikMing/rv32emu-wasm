@@ -30,6 +30,32 @@ $(call set-feature, BLOCK_CHAINING)
 ENABLE_SYSTEM ?= 0
 $(call set-feature, SYSTEM)
 
+# Definition that bridges:
+#   Device Tree(range)
+#   src/io.c(memory init)
+#   src/riscv.c(system emulation layout init)
+ifeq ($(call has, SYSTEM), 1)
+MiB = 1024*1024
+MEM_START ?= 0
+MEM_SIZE ?= 1024  # unit in MiB
+DTB_SIZE ?= 1     # unit in MiB
+INITRD_SIZE ?= 64 # unit in MiB
+
+compute_size = $(shell echo "obase=16; ibase=10; $(1)*$(MiB)" | bc)
+REAL_MEM_SIZE = $(call compute_size, $(MEM_SIZE))
+REAL_DTB_SIZE = $(call compute_size, $(DTB_SIZE))
+REAL_INITRD_SIZE = $(call compute_size, $(INITRD_SIZE))
+
+CFLAGS_dt += -DMEM_START=0x$(MEM_START)\
+             -DMEM_END=0x$(REAL_MEM_SIZE) \
+             -DINITRD_START=0x$(shell echo "obase=16; ibase=16; $(REAL_MEM_SIZE) - \
+	                      $(call compute_size, ($(INITRD_SIZE)+$(DTB_SIZE)))" | bc) \
+             -DINITRD_END=0x$(shell echo "obase=16; ibase=16; $(REAL_MEM_SIZE) - \
+                            $(call compute_size, $(DTB_SIZE)) - 1" | bc)
+
+CFLAGS += -DMEM_SIZE=0x$(REAL_MEM_SIZE) -DDTB_SIZE=0x$(REAL_DTB_SIZE) -DINITRD_SIZE=0x$(REAL_INITRD_SIZE)
+endif
+
 # Enable link-time optimization (LTO)
 ENABLE_LTO ?= 1
 ifeq ($(call has, LTO), 1)
@@ -151,8 +177,9 @@ endif
 
 # Full access to a 4 GiB address space, necessitating more memory mapping
 # during emulator initialization.
+# If SYSTEM is enabled, skip this bacause guestOS has dedicated memory mapping range.
 $(call set-feature, FULL4G)
-ifeq ($(call has, FULL4G), 1)
+ifeq ($(and $(call has, FULL4G), $(if $(call has, SYSTEM), 0, 1)), 1)
 $(OUT)/main.o: CFLAGS += -DMEM_SIZE=0xFFFFFFFFULL # 2^{32} - 1
 endif
 
