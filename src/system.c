@@ -298,7 +298,7 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
 
     /* try to hit the translated gPA */
     bool tlb_hit = tlb_find(PRIV(rv)->tlb, iTLB, vaddr, &addr);
-    if (tlb_hit)
+    if (likely(tlb_hit))
         goto hit;
 
     uint32_t level;
@@ -320,7 +320,7 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
     addr = ppn | offset;
 
     /* cache translated gPA */
-    tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, addr, level);
+    tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, ppn, level);
 hit:
     return memory_ifetch(addr);
 }
@@ -428,10 +428,6 @@ static void mmu_write_b(riscv_t *rv, const uint32_t vaddr, const uint8_t val)
 #endif
 }
 
-/*
- * TODO: dTLB can be introduced here to
- * cache the gVA to gPA tranlation.
- */
 static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
 {
     if (!rv->csr_satp)
@@ -439,7 +435,7 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
 
     /* try to hit the translated gPA */
     bool tlb_hit = tlb_find(PRIV(rv)->tlb, dTLB, vaddr, &addr);
-    if (tlb_hit)
+    if (likely(tlb_hit))
         goto hit;
 
     uint32_t level;
@@ -459,7 +455,7 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     addr = ppn | offset;
 
     /* cache translated gPA */
-    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, addr, level);
+    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, ppn, level);
 hit:
     return addr;
 }

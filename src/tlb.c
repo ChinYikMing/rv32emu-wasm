@@ -25,9 +25,12 @@ bool tlb_find(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr)
     list_for_each_entry (entry, tlb_list, list, tlb_entry_t)
 #endif
     {
-        uint32_t vpn = vaddr & ~MASK(RV_PG_SHIFT);
-        uint32_t offset = entry->level == 1 ? vaddr & ~MASK(RV_PG_SHIFT + 10)
-                                            : vaddr & ~MASK(RV_PG_SHIFT);
+        uint32_t vpn =
+            entry->level == 1
+                ? (vaddr & ~MASK(RV_PG_SHIFT + 10)) >> (RV_PG_SHIFT + 10)
+                : (vaddr & ~MASK(RV_PG_SHIFT)) >> (RV_PG_SHIFT);
+        uint32_t offset = entry->level == 1 ? vaddr & MASK(RV_PG_SHIFT + 10)
+                                            : vaddr & MASK(RV_PG_SHIFT);
 
         /* TLB hit */
         if (entry->vpn == vpn && entry->valid) {
@@ -72,7 +75,7 @@ FORCE_INLINE void _tlb_refill(tlb_t *tlb, tlb_type_t type, tlb_entry_t *entry)
 void tlb_refill(tlb_t *tlb,
                 tlb_type_t type,
                 uint32_t vaddr,
-                uint32_t addr,
+                uint32_t ppn,
                 int level)
 {
     uint32_t tlb_size = type == iTLB ? tlb->itlb_size : tlb->dtlb_size;
@@ -92,9 +95,11 @@ void tlb_refill(tlb_t *tlb,
      * Ignore the offset for both vpn and ppn since
      * the offset might changes within the same page access
      */
-    new_entry->ppn = vaddr & ~MASK(RV_PG_SHIFT);
     new_entry->vpn =
-        level == 1 ? addr & ~MASK(RV_PG_SHIFT + 10) : addr & ~MASK(RV_PG_SHIFT);
+            level == 1
+                ? (vaddr & ~MASK(RV_PG_SHIFT + 10)) >> (RV_PG_SHIFT + 10)
+                : (vaddr & ~MASK(RV_PG_SHIFT)) >> (RV_PG_SHIFT);
+    new_entry->ppn = ppn;
     new_entry->valid = true;
     new_entry->level = level;
 

@@ -40,7 +40,7 @@ bool tlb_find(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr);
 void tlb_refill(tlb_t *tlb,
                 tlb_type_t type,
                 uint32_t vaddr,
-                uint32_t addr,
+                uint32_t ppn,
                 int level);
 
 /* flush iTLB and dTLB */

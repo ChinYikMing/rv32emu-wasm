@@ -14,8 +14,8 @@
 
 #if RV32_HAS(SYSTEM)
 #include "plic.h"
-#include "uart.h"
 #include "tlb.h"
+#include "uart.h"
 #endif /* RV32_HAS(SYSTEM) */
 
 #if RV32_HAS(EXT_F)
