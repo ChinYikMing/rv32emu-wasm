@@ -1156,6 +1156,9 @@ RVOP(
 RVOP(
     sfencevma,
     {
+        uint32_t asid = ir->rs2;
+        uint32_t vaddr = ir->rs1;
+        tlb_flush(PRIV(rv)->tlb, asid, vaddr);
         PC += 4;
         /* FIXME: fill real implementations */
         goto end_op;

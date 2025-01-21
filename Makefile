@@ -9,7 +9,7 @@ CONFIG_FILE := $(OUT)/.config
 
 CFLAGS = -std=gnu99 -O2 -Wall -Wextra -Werror
 CFLAGS += -Wno-unused-label
-CFLAGS += -include src/common.h -Isrc/
+CFLAGS += -include src/common.h -Isrc/ -Isrc/devices
 
 # In the system test suite, the executable is an ELF file (e.g., MMU).
 # However, the Linux kernel emulation includes the Image, DT, and
@@ -289,6 +289,7 @@ OBJS := \
 	riscv.o \
 	elf.o \
 	cache.o \
+	tlb.o \
 	mpool.o \
 	$(OBJS_EXT) \
 	main.o

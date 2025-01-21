@@ -488,6 +488,10 @@ riscv_t *rv_create(riscv_user_t rv_attr)
     rv_set_reg(rv, rv_reg_a0, 0);
     rv_set_reg(rv, rv_reg_a1, dtb_addr);
 
+    /* setup TLB */
+    attr->tlb = tlb_new(attr->tlb_size);
+    assert(attr->tlb);
+
     /* setup timer */
     attr->timer = 0xFFFFFFFFFFFFFFF;
 
@@ -642,6 +646,7 @@ void rv_delete(riscv_t *rv)
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     u8250_delete(attr->uart);
     plic_delete(attr->plic);
+    tlb_delete(attr->tlb);
 #endif
     free(rv);
 }

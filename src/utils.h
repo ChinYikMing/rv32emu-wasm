@@ -73,14 +73,24 @@ static inline bool list_empty(const struct list_head *head)
     return head->next == head;
 }
 
-static inline void list_add(struct list_head *node, struct list_head *head)
+static inline void __list_add(struct list_head *node,
+                              struct list_head *prev,
+                              struct list_head *next)
 {
-    struct list_head *next = head->next;
-
     next->prev = node;
     node->next = next;
-    node->prev = head;
-    head->next = node;
+    node->prev = prev;
+    prev->next = node;
+}
+
+static inline void list_add(struct list_head *node, struct list_head *head)
+{
+    __list_add(node, head, head->next);
+}
+
+static inline void list_add_tail(struct list_head *node, struct list_head *head)
+{
+    __list_add(node, head->prev, head);
 }
 
 static inline void list_del(struct list_head *node)
@@ -95,6 +105,12 @@ static inline void list_del_init(struct list_head *node)
 {
     list_del(node);
     INIT_LIST_HEAD(node);
+}
+
+static inline int list_is_head(const struct list_head *list,
+                               const struct list_head *head)
+{
+    return list == head;
 }
 
 #define list_entry(node, type, member) container_of(node, type, member)

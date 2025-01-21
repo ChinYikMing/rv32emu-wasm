@@ -13,8 +13,9 @@
 #include "map.h"
 
 #if RV32_HAS(SYSTEM)
-#include "devices/plic.h"
-#include "devices/uart.h"
+#include "plic.h"
+#include "uart.h"
+#include "tlb.h"
 #endif /* RV32_HAS(SYSTEM) */
 
 #if RV32_HAS(EXT_F)
@@ -565,18 +566,27 @@ typedef struct {
 } vm_data_t;
 
 typedef struct {
-#if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+#if RV32_HAS(SYSTEM)
+#if !RV32_HAS(ELF_LOADER)
     /* uart object */
     u8250_state_t *uart;
 
     /* plic object */
     plic_t *plic;
-#endif /* RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER) */
+#endif /* !RV32_HAS(ELF_LOADER) */
+
+    /* iTLB and dTLB */
+    tlb_t *tlb;
+
+    /* TLB size */
+    uint32_t tlb_size;
+#endif /* RV32_HAS(SYSTEM) */
 
     /* vm memory object */
     memory_t *mem;
 
-    /* max memory size is 2^32 - 1 bytes.
+    /*
+     * max memory size is 2^32 - 1 bytes.
      * It is for portable on both 32-bit and 64-bit platforms. In this way,
      * emulator can access any segment of the memory on either platform.
      */

@@ -226,6 +226,16 @@ void indirect_rv_halt()
 }
 #endif
 
+/*
+ * User defines the TLB capacity to suit their need.
+ * If it is not defined, use the default 64.
+ */
+#if RV32_HAS(SYSTEM)
+#ifndef TLB_SIZE
+#define TLB_SIZE 64
+#endif
+#endif
+
 int main(int argc, char **args)
 {
     if (argc == 1 || !parse_args(argc, args)) {
@@ -244,6 +254,9 @@ int main(int argc, char **args)
 
     vm_attr_t attr = {
         .mem_size = MEM_SIZE,
+#if RV32_HAS(SYSTEM)
+        .tlb_size = TLB_SIZE,
+#endif
         .stack_size = STACK_SIZE,
         .args_offset_size = ARGS_OFFSET_SIZE,
         .argc = prog_argc,

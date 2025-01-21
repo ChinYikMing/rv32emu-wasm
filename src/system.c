@@ -120,6 +120,7 @@ enum SUPPORTED_MMIO {
 
 uint32_t ppn;
 uint32_t offset;
+uint32_t addr;
 static bool ppn_is_valid(riscv_t *rv, uint32_t ppn)
 {
     vm_attr_t *attr = PRIV(rv);
@@ -139,7 +140,7 @@ static bool ppn_is_valid(riscv_t *rv, uint32_t ppn)
  * @level: the level of which the PTE is located
  * @return: NULL if a not found or fault else the corresponding PTE
  */
-uint32_t *mmu_walk(riscv_t *rv, const uint32_t vaddr, uint32_t *level)
+pte_t *mmu_walk(riscv_t *rv, const uint32_t vaddr, uint32_t *level)
 {
     vm_attr_t *attr = PRIV(rv);
     uint32_t ppn = rv->csr_satp & MASK(22);
@@ -316,7 +317,7 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
 
 static uint32_t mmu_read_w(riscv_t *rv, const uint32_t vaddr)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, R);
+    addr = rv->io.mem_translate(rv, vaddr, R);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -335,7 +336,7 @@ static uint32_t mmu_read_w(riscv_t *rv, const uint32_t vaddr)
 
 static uint16_t mmu_read_s(riscv_t *rv, const uint32_t vaddr)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, R);
+    addr = rv->io.mem_translate(rv, vaddr, R);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -347,7 +348,7 @@ static uint16_t mmu_read_s(riscv_t *rv, const uint32_t vaddr)
 
 static uint8_t mmu_read_b(riscv_t *rv, const uint32_t vaddr)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, R);
+    addr = rv->io.mem_translate(rv, vaddr, R);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -366,7 +367,7 @@ static uint8_t mmu_read_b(riscv_t *rv, const uint32_t vaddr)
 
 static void mmu_write_w(riscv_t *rv, const uint32_t vaddr, const uint32_t val)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, W);
+    addr = rv->io.mem_translate(rv, vaddr, W);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -385,7 +386,7 @@ static void mmu_write_w(riscv_t *rv, const uint32_t vaddr, const uint32_t val)
 
 static void mmu_write_s(riscv_t *rv, const uint32_t vaddr, const uint16_t val)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, W);
+    addr = rv->io.mem_translate(rv, vaddr, W);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -400,7 +401,7 @@ static void mmu_write_s(riscv_t *rv, const uint32_t vaddr, const uint16_t val)
 
 static void mmu_write_b(riscv_t *rv, const uint32_t vaddr, const uint8_t val)
 {
-    uint32_t addr = rv->io.mem_translate(rv, vaddr, W);
+    addr = rv->io.mem_translate(rv, vaddr, W);
 
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
     if (need_handle_signal)
@@ -426,6 +427,11 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     if (!rv->csr_satp)
         return vaddr;
 
+    /* try to hit the translated gPA */
+    bool tlb_hit = tlb_find(PRIV(rv)->tlb, dTLB, vaddr, &addr);
+    if (tlb_hit)
+        return addr;
+
     uint32_t level;
     pte_t *pte = mmu_walk(rv, vaddr, &level);
     bool ok = rw ? MMU_FAULT_CHECK(read, rv, pte, vaddr, PTE_R)
@@ -440,7 +446,12 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     }
 
     get_ppn_and_offset();
-    return ppn | offset;
+    addr = ppn | offset;
+
+    /* cache translated gPA */
+    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, addr, level);
+
+    return addr;
 }
 
 riscv_io_t mmu_io = {
