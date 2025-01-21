@@ -296,6 +296,11 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
     if (!rv->csr_satp)
         return memory_ifetch(vaddr);
 
+    /* try to hit the translated gPA */
+    bool tlb_hit = tlb_find(PRIV(rv)->tlb, iTLB, vaddr, &addr);
+    if (tlb_hit)
+        goto hit;
+
     uint32_t level;
     pte_t *pte = mmu_walk(rv, vaddr, &level);
     bool ok = MMU_FAULT_CHECK(ifetch, rv, pte, vaddr, PTE_X);
@@ -312,7 +317,12 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
         return 0;
 
     get_ppn_and_offset();
-    return memory_ifetch(ppn | offset);
+    addr = ppn | offset;
+
+    /* cache translated gPA */
+    tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, addr, level);
+hit:
+    return memory_ifetch(addr);
 }
 
 static uint32_t mmu_read_w(riscv_t *rv, const uint32_t vaddr)
@@ -430,7 +440,7 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     /* try to hit the translated gPA */
     bool tlb_hit = tlb_find(PRIV(rv)->tlb, dTLB, vaddr, &addr);
     if (tlb_hit)
-        return addr;
+        goto hit;
 
     uint32_t level;
     pte_t *pte = mmu_walk(rv, vaddr, &level);
@@ -450,7 +460,7 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
 
     /* cache translated gPA */
     tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, addr, level);
-
+hit:
     return addr;
 }
 
