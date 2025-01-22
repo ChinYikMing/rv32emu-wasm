@@ -297,9 +297,9 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
         return memory_ifetch(vaddr);
 
     /* try to hit the translated gPA */
-    bool tlb_hit = tlb_find(PRIV(rv)->tlb, iTLB, vaddr, &addr);
-    if (likely(tlb_hit))
-        goto hit;
+    // bool tlb_hit = tlb_lookup(PRIV(rv)->tlb, iTLB, vaddr, &addr);
+    // if (likely(tlb_hit))
+    //     goto hit;
 
     uint32_t level;
     pte_t *pte = mmu_walk(rv, vaddr, &level);
@@ -320,7 +320,7 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
     addr = ppn | offset;
 
     /* cache translated gPA */
-    tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, ppn, level);
+    // tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, ppn, level);
 hit:
     return memory_ifetch(addr);
 }
@@ -433,8 +433,10 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     if (!rv->csr_satp)
         return vaddr;
 
+    uint32_t access = rw ? PTE_R : PTE_W;
+
     /* try to hit the translated gPA */
-    bool tlb_hit = tlb_find(PRIV(rv)->tlb, dTLB, vaddr, &addr);
+    bool tlb_hit = tlb_lookup(PRIV(rv)->tlb, dTLB, vaddr, &addr, access);
     if (likely(tlb_hit))
         goto hit;
 
@@ -454,8 +456,15 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     get_ppn_and_offset();
     addr = ppn | offset;
 
+    /*
+     * Access should be determined by the RWX permissions in the PTE.
+     *
+     * Note that we don't care the valid bit.
+     */
+    access = (*pte & MASK(PTE_XWRV));
+
     /* cache translated gPA */
-    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, ppn, level);
+    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, ppn, level, access);
 hit:
     return addr;
 }

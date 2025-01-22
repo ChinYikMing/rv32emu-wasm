@@ -16,7 +16,6 @@ typedef struct {
     uint32_t vpn;
     uint32_t ppn;
     int level;
-    bool valid;
     struct list_head list;
 } tlb_entry_t;
 
@@ -28,20 +27,28 @@ typedef struct {
     uint32_t itlb_size;
     uint32_t itlb_capacity;
     struct list_head itlb_list;
+
+    uint32_t vpn[64];
+    uint32_t level[64];
+    uint32_t ppn[64];
+    uint32_t access[64];
+    uint32_t size;
+    uint32_t cap;
 } tlb_t;
 
 /*
- * find translated gPA in TLB
- * return true if found else false
+ * lookup translated gPA in TLB
+ * return true and store gPA in addr if found else return false
  */
-bool tlb_find(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr);
+bool tlb_lookup(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr, uint32_t access);
 
 /* Refill the TLB for a page fault vaddr */
 void tlb_refill(tlb_t *tlb,
                 tlb_type_t type,
                 uint32_t vaddr,
                 uint32_t ppn,
-                int level);
+                int level,
+		uint32_t access);
 
 /* flush iTLB and dTLB */
 void tlb_flush(tlb_t *tlb, uint32_t asid, uint32_t vaddr);

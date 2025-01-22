@@ -164,6 +164,7 @@ typedef uint32_t pte_t;
 #define PTE_G (1U << 5)
 #define PTE_A (1U << 6)
 #define PTE_D (1U << 7)
+#define PTE_XWRV (4)
 
 /* PTE XWRV bit in order */
 enum SV32_PTE_PERM {
