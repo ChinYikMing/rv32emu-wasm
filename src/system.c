@@ -16,6 +16,8 @@
 #define R 1
 #define W 0
 
+uint32_t addr;
+
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
 void emu_update_uart_interrupts(riscv_t *rv)
 {
@@ -118,9 +120,6 @@ enum SUPPORTED_MMIO {
     } while (0)
 #endif
 
-uint32_t ppn;
-uint32_t offset;
-uint32_t addr;
 static bool ppn_is_valid(riscv_t *rv, uint32_t ppn)
 {
     vm_attr_t *attr = PRIV(rv);
@@ -260,12 +259,22 @@ MMU_FAULT_CHECK_IMPL(ifetch, pagefault_insn)
 MMU_FAULT_CHECK_IMPL(read, pagefault_load)
 MMU_FAULT_CHECK_IMPL(write, pagefault_store)
 
-#define get_ppn_and_offset()                                   \
-    do {                                                       \
-        assert(pte);                                           \
-        ppn = *pte >> (RV_PG_SHIFT - 2) << RV_PG_SHIFT;        \
-        offset = level == 1 ? vaddr & MASK((RV_PG_SHIFT + 10)) \
-                            : vaddr & MASK(RV_PG_SHIFT);       \
+uint32_t ppn;
+uint32_t offset;
+uint32_t access;
+#define get_ppn_offset_access()                                           \
+    do {                                                                  \
+        assert(pte);                                                      \
+        ppn = *pte >> (RV_PG_SHIFT - 2) << RV_PG_SHIFT;                   \
+        offset = level == 1 ? vaddr & MASK((RV_PG_SHIFT + 10))            \
+                            : vaddr & MASK(RV_PG_SHIFT);                  \
+        /*                                                                \
+         * Access should be determined by the RWX permissions in the PTE, \
+         * not the initial access by rv->io.mem_xxx() handler.            \
+         *                                                                \
+         * Note that we don't care the valid bit.                         \
+         */                                                               \
+        access = (*pte & MASK(PTE_XWRV));                                 \
     } while (0)
 
 /* The IO handler that operates when the Memory Management Unit (MMU)
@@ -289,17 +298,19 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
 {
     /*
      * Do not call rv->io.mem_translate() because the basic block might be
-     * retranslated and the corresponding PTE is NULL, get_ppn_and_offset()
+     * retranslated and the corresponding PTE is NULL, get_ppn_offset_access()
      * cannot work on a NULL PTE.
      */
 
     if (!rv->csr_satp)
         return memory_ifetch(vaddr);
 
-    /* try to hit the translated gPA */
-    // bool tlb_hit = tlb_lookup(PRIV(rv)->tlb, iTLB, vaddr, &addr);
-    // if (likely(tlb_hit))
-    //     goto hit;
+    /* try to hit the translated gPA in iTLB */
+    bool tlb_hit =
+        tlb_lookup(PRIV(rv)->tlb, iTLB, vaddr, &addr, PTE_X, rv->priv_mode);
+    // bool tlb_hit = tlb_lookup(PRIV(rv)->tlb, iTLB, vaddr, &addr, PTE_X);
+     if (likely(tlb_hit))
+         goto hit;
 
     uint32_t level;
     pte_t *pte = mmu_walk(rv, vaddr, &level);
@@ -316,11 +327,11 @@ static uint32_t mmu_ifetch(riscv_t *rv, const uint32_t vaddr)
     if (need_retranslate)
         return 0;
 
-    get_ppn_and_offset();
+    get_ppn_offset_access();
     addr = ppn | offset;
 
-    /* cache translated gPA */
-    // tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, ppn, level);
+    /* cache translated gPA in iTLB */
+    tlb_refill(PRIV(rv)->tlb, iTLB, vaddr, ppn, access, level);
 hit:
     return memory_ifetch(addr);
 }
@@ -433,10 +444,9 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
     if (!rv->csr_satp)
         return vaddr;
 
-    uint32_t access = rw ? PTE_R : PTE_W;
-
-    /* try to hit the translated gPA */
-    bool tlb_hit = tlb_lookup(PRIV(rv)->tlb, dTLB, vaddr, &addr, access);
+    /* try to hit the translated gPA in dTLB */
+    bool tlb_hit =
+        tlb_lookup(PRIV(rv)->tlb, dTLB, vaddr, &addr,rw ? PTE_R : PTE_W, rv->priv_mode);
     if (likely(tlb_hit))
         goto hit;
 
@@ -453,18 +463,11 @@ static uint32_t mmu_translate(riscv_t *rv, uint32_t vaddr, bool rw)
         pte = mmu_walk(rv, vaddr, &level);
     }
 
-    get_ppn_and_offset();
+    get_ppn_offset_access();
     addr = ppn | offset;
 
-    /*
-     * Access should be determined by the RWX permissions in the PTE.
-     *
-     * Note that we don't care the valid bit.
-     */
-    access = (*pte & MASK(PTE_XWRV));
-
-    /* cache translated gPA */
-    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, ppn, level, access);
+    /* cache translated gPA in dTLB */
+    tlb_refill(PRIV(rv)->tlb, dTLB, vaddr, ppn, access, level);
 hit:
     return addr;
 }

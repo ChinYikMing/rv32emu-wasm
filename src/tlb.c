@@ -13,8 +13,8 @@
 uint32_t vpn, offset;
 #define get_vpn_and_offset()                                        \
     do {                                                            \
-        vpn = get_vpn_by_vaddr_n_level(vaddr, tlb->level[i]);        \
-        offset = tlb->level[i] == 1 ? vaddr & MASK(RV_PG_SHIFT + 10) \
+        vpn = get_vpn_by_vaddr_n_level(vaddr, entry->level);        \
+        offset = entry->level == 1 ? vaddr & MASK(RV_PG_SHIFT + 10) \
                                    : vaddr & MASK(RV_PG_SHIFT);     \
     } while (0)
 
@@ -24,17 +24,44 @@ uint32_t vpn, offset;
                    : (vaddr & ~MASK(RV_PG_SHIFT)) >> (RV_PG_SHIFT);          \
     })
 
-bool tlb_lookup(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr, uint32_t access)
+bool tlb_lookup(tlb_t *tlb,
+                tlb_type_t type,
+                uint32_t vaddr,
+                uint32_t *addr,
+                uint32_t access,
+                uint32_t priv_mode)
 {
     struct list_head *tlb_list =
         type == iTLB ? &tlb->itlb_list : &tlb->dtlb_list;
     tlb_entry_t *entry = NULL;
 
-    for(int i = 0; i < tlb->cap; i++){
+    if (list_empty(tlb_list))
+        return false;
+
+#ifdef __HAVE_TYPEOF
+    list_for_each_entry (entry, tlb_list, list)
+#else
+    list_for_each_entry (entry, tlb_list, list, tlb_entry_t)
+#endif
+    {
+        /*
+         * The vpn is used to match the TLB entry,
+         * and the offset is concatenated with the PPN to compute the actual
+         * physical address.
+         */
         get_vpn_and_offset();
-        if(tlb->vpn[i] == vpn && tlb->access[i] == access){
-        	*addr = tlb->ppn[i] | offset;
-        	return true;
+
+        /* TLB hit */
+	// FIXME: privilege mode violation
+        if (entry->vpn == vpn && entry->access & access) {
+	    if(entry->access & PTE_U){ // user page
+	    	if(priv_mode == 0){ // user
+                    *addr = entry->ppn | offset;
+		    return true;
+		} else { // system or bare metal
+		}
+	    } else {
+	    }
         }
     }
 
@@ -45,23 +72,17 @@ bool tlb_lookup(tlb_t *tlb, tlb_type_t type, uint32_t vaddr, uint32_t *addr, uin
 /* FIFO flavor */
 void tlb_evict(tlb_t *tlb, tlb_type_t type)
 {
-    //struct list_head *tlb_list =
-    //    type == iTLB ? &tlb->itlb_list : &tlb->dtlb_list;
-    //uint32_t *tlb_size = type == iTLB ? &tlb->itlb_size : &tlb->dtlb_size;
+    struct list_head *tlb_list =
+        type == iTLB ? &tlb->itlb_list : &tlb->dtlb_list;
+    uint32_t *tlb_size = type == iTLB ? &tlb->itlb_size : &tlb->dtlb_size;
 
-    //assert(!list_empty(tlb_list));
+    assert(!list_empty(tlb_list));
 
-    //tlb_entry_t *first_entry = list_first_entry(tlb_list, tlb_entry_t, list);
-    //assert(first_entry);
-    //list_del_init(&first_entry->list);
-    //free(first_entry);
-    //(*tlb_size)--;
-    for(int i = 0; i < tlb->cap - 1; i++){
-    	tlb->vpn[i] = tlb->vpn[i + 1];
-    	tlb->level[i] = tlb->level[i + 1];
-    	tlb->ppn[i] = tlb->ppn[i + 1];
-    }
-    tlb->size--;
+    tlb_entry_t *first_entry = list_first_entry(tlb_list, tlb_entry_t, list);
+    assert(first_entry);
+    list_del_init(&first_entry->list);
+    free(first_entry);
+    (*tlb_size)--;
 }
 
 FORCE_INLINE void _tlb_refill(tlb_t *tlb, tlb_type_t type, tlb_entry_t *entry)
@@ -78,39 +99,31 @@ void tlb_refill(tlb_t *tlb,
                 tlb_type_t type,
                 uint32_t vaddr,
                 uint32_t ppn,
-                int level,
-		uint32_t access)
+                uint32_t access,
+                int level)
 {
     uint32_t tlb_size = type == iTLB ? tlb->itlb_size : tlb->dtlb_size;
     uint32_t tlb_capacity =
         type == iTLB ? tlb->itlb_capacity : tlb->dtlb_capacity;
 
     /* TLB is full, so evict */
-    //if (tlb_size == tlb_capacity)
-    //    tlb_evict(tlb, type);
-
-    if (tlb->size == tlb->cap)
+    if (tlb_size == tlb_capacity)
         tlb_evict(tlb, type);
 
-    //tlb_entry_t *new_entry = calloc(1, sizeof(tlb_entry_t));
-    //assert(new_entry);
-    ////INIT_LIST_HEAD(&new_entry->list);
+    tlb_entry_t *new_entry = calloc(1, sizeof(tlb_entry_t));
+    assert(new_entry);
+    INIT_LIST_HEAD(&new_entry->list);
 
-    ///*
-    // * Ignore the offset for both vpn and ppn since
-    // * the offset might changes within the same page access.
-    // */
-    //new_entry->vpn = get_vpn_by_vaddr_n_level(vaddr, level);
-    //new_entry->ppn = ppn;
-    //new_entry->level = level;
+    /*
+     * Ignore the offset for both vpn and ppn since
+     * the offset might changes within the same page access.
+     */
+    new_entry->vpn = get_vpn_by_vaddr_n_level(vaddr, level);
+    new_entry->ppn = ppn;
+    new_entry->access = access;
+    new_entry->level = level;
 
-    //_tlb_refill(tlb, type, new_entry);
-    tlb->vpn[tlb->size] = get_vpn_by_vaddr_n_level(vaddr, level);
-    tlb->ppn[tlb->size] = ppn;
-    tlb->level[tlb->size] = level;
-    tlb->access[tlb->size] = access;
-    tlb->size++;
-    assert(tlb->size <= tlb->cap);
+    _tlb_refill(tlb, type, new_entry);
 }
 
 FORCE_INLINE void _tlb_flush(tlb_t *tlb,
@@ -122,8 +135,20 @@ FORCE_INLINE void _tlb_flush(tlb_t *tlb,
         type == iTLB ? &tlb->itlb_list : &tlb->dtlb_list;
     tlb_entry_t *entry = NULL;
 
-    for(int i = 0; i < tlb->cap; i++){
-    	tlb->vpn[i] = -1;
+#ifdef __HAVE_TYPEOF
+    list_for_each_entry (entry, tlb_list, list)
+#else
+    list_for_each_entry (entry, tlb_list, list, tlb_entry_t)
+#endif
+    {
+        entry->vpn = -1;
+
+        /* TODO: ASID aware */
+        if (asid == 0 && vaddr == 0) {
+        } else if (asid == 0 && vaddr == 1) {
+        } else if (asid == 1 && vaddr == 0) {
+        } else {
+        }
     }
 }
 
@@ -151,11 +176,8 @@ tlb_t *tlb_new(uint32_t tlb_size)
     tlb_t *tlb = calloc(1, sizeof(tlb_t));
     assert(tlb);
 
-    //tlb_init(tlb, iTLB, tlb_size);
-    //tlb_init(tlb, dTLB, tlb_size);
-
-    tlb->size = 0;
-    tlb->cap = 64;
+    tlb_init(tlb, iTLB, tlb_size);
+    tlb_init(tlb, dTLB, tlb_size);
 
     return tlb;
 }
