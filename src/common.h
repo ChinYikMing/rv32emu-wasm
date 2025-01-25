@@ -30,6 +30,15 @@
 
 #define MASK(n) (~((~0U << (n))))
 
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+#define SDL_CLEANUP(window)        \
+    do {                           \
+        SDL_DestroyWindow(window); \
+        window = NULL;             \
+        SDL_Quit();                \
+    } while (0)
+#endif /* RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER) */
+
 #if defined(_MSC_VER)
 #include <intrin.h>
 static inline int rv_clz(uint32_t v)

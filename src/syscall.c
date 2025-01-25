@@ -3,6 +3,7 @@
  * "LICENSE" for information on usage and redistribution of this file.
  */
 
+#include <SDL.h>
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -132,9 +133,22 @@ error_handler:
     rv_set_reg(rv, rv_reg_a0, -1);
 }
 
-
 static void syscall_exit(riscv_t *rv)
 {
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+    /*
+     * guestOS might open and close SDL window multiple times,
+     * and the user might close the SDL window using application
+     * builtin exit function. We have to trap the buildin exit
+     * and close the SDL window properly.
+     */
+    extern SDL_Window *window;
+    if (window) {
+        SDL_CLEANUP(window);
+        return;
+    }
+#endif
+
     /* simply halt cpu and save exit code.
      * the application decides the usage of exit code
      */

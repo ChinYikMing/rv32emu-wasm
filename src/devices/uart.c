@@ -3,6 +3,7 @@
  * "LICENSE" for information on usage and redistribution of this file.
  */
 
+#include <SDL.h>
 #include <assert.h>
 #include <errno.h>
 #include <poll.h>
@@ -63,12 +64,31 @@ static uint8_t u8250_handle_in(u8250_state_t *uart)
     uart->in_ready = false;
     u8250_check_ready(uart);
 
-    if (value == 1) {           /* start of heading (Ctrl-a) */
-        if (getchar() == 120) { /* keyboard x */
-            printf("\n");       /* end emulator with newline */
+    if (value == 1) {          /* start of heading (Ctrl-a) */
+        if (getchar() == 10) { /* keyboard x */
+            printf("\n");      /* end emulator with newline */
             exit(0);
         }
     }
+
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+    /*
+     * guestOS might open and close SDL window multiple times,
+     * and the user might not close the SDL window using application
+     * builtin exit function or the SDL_QUIT event, instead pressing the
+     * CTRL-C key to generate the SIGINT to force down the application.
+     * In this way, the SDL window will be not closed properly. Thus,
+     * catch the SIGINT and determine if any SDL window is opened. If yes,
+     * then close it.
+     */
+
+    extern void shutdown_audio();
+    extern SDL_Window *window;
+    if (value == 3 && window){ /* start of heading (Ctrl-c) */
+	shutdown_audio();
+        SDL_CLEANUP(window);
+    }
+#endif
 
     return value;
 }

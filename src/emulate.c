@@ -1283,6 +1283,7 @@ void ecall_handler(riscv_t *rv)
             rv_get_reg(rv, rv_reg_a7) == 0xC0DE ||
             rv_get_reg(rv, rv_reg_a7) == 0xFEED ||
             rv_get_reg(rv, rv_reg_a7) == 0xBABE ||
+            rv_get_reg(rv, rv_reg_a7) == 93 ||
             rv_get_reg(rv, rv_reg_a7) == 0xD00D) {
             syscall_handler(rv);
             rv->PC += 4;

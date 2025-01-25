@@ -149,7 +149,7 @@ typedef struct {
 } submission_queue_t;
 
 /* SDL-related variables */
-static SDL_Window *window = NULL;
+SDL_Window *window = NULL;
 static SDL_Renderer *renderer;
 static SDL_Texture *texture;
 
@@ -882,7 +882,7 @@ static void play_music(riscv_t *rv)
 #endif
 }
 
-static void stop_music(riscv_t *rv UNUSED)
+static void stop_music()
 {
     if (Mix_PlayingMusic())
         Mix_HaltMusic();
@@ -924,9 +924,8 @@ static void init_audio(void)
     }
 }
 
-static void shutdown_audio(riscv_t *rv)
+void shutdown_audio()
 {
-
     /*
      * To avoid main thread exit before them
      * since they might access invalid memory
@@ -934,7 +933,7 @@ static void shutdown_audio(riscv_t *rv)
     pthread_join(sfx_thread, NULL);
     pthread_join(music_thread, NULL);
 
-    stop_music(rv);
+    stop_music();
     Mix_HaltChannel(-1);
     Mix_CloseAudio();
     Mix_Quit();
@@ -955,7 +954,7 @@ void syscall_setup_audio(riscv_t *rv)
         init_audio();
         break;
     case SHUTDOWN_AUDIO:
-        shutdown_audio(rv);
+        shutdown_audio();
         break;
     default:
         fprintf(stderr, "unknown sound request\n");
