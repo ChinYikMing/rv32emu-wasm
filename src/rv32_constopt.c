@@ -389,6 +389,8 @@ CONSTOPT(mret, {})
  * structures with current execution
  */
 CONSTOPT(sfencevma, {})
+CONSTOPT(hfencegvma, {})
+CONSTOPT(hfencevvma, {})
 
 #if RV32_HAS(Zifencei) /* RV32 Zifencei Standard Extension */
 CONSTOPT(fencei, {})

@@ -1164,6 +1164,28 @@ RVOP(
         assert; /* FIXME: Implement */
     }))
 
+RVOP(
+    hfencevvma,
+    {
+        PC += 4;
+        /* FIXME: fill real implementations */
+        goto end_op;
+    },
+    GEN({
+        assert; /* FIXME: Implement */
+    }))
+
+RVOP(
+    hfencegvma,
+    {
+        PC += 4;
+        /* FIXME: fill real implementations */
+        goto end_op;
+    },
+    GEN({
+        assert; /* FIXME: Implement */
+    }))
+
 #if RV32_HAS(Zifencei) /* RV32 Zifencei Standard Extension */
 RVOP(
     fencei,

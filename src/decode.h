@@ -81,6 +81,8 @@ enum op_field {
     IIF(RV32_HAS(SYSTEM))(                             \
         _(sret, 1, 4, 0, ENC(rs1, rd))                 \
     )                                                  \
+    _(hfencegvma, 1, 4, 0, ENC(rs1, rs2, rd))                     \
+    _(hfencevvma, 1, 4, 0, ENC(rs1, rs2, rd))                     \
     _(hret, 0, 4, 0, ENC(rs1, rd))                     \
     _(mret, 1, 4, 0, ENC(rs1, rd))                     \
     _(sfencevma, 1, 4, 0, ENC(rs1, rs2, rd))           \

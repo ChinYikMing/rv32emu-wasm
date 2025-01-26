@@ -992,6 +992,8 @@ static inline bool op_system(rv_insn_t *ir, const uint32_t insn)
     /* inst        funct7  rs2 rs1 funct3 rd     opcode
      * -----------+-------+---+---+------+------+-------
      * SFENCE.VMA  0001001 rs2 rs1  000   00000  1110011
+     * HFENCE.GVMA 0010001 rs2 rs1  000   00000  1110011
+     * HFENCE.VVMA 0110001 rs2 rs1  000   00000  1110011
      */
 
     /* decode I-type */
@@ -1002,6 +1004,14 @@ static inline bool op_system(rv_insn_t *ir, const uint32_t insn)
     case 0:
         if ((insn >> 25) == 0b0001001) { /* SFENCE.VMA */
             ir->opcode = rv_insn_sfencevma;
+            break;
+        }
+        if ((insn >> 25) == 0b0110001) { /* HFENCE.GVMA */
+            ir->opcode = rv_insn_hfencegvma;
+            break;
+        }
+        if ((insn >> 25) == 0b0010001) { /* HFENCE.VVMA */
+            ir->opcode = rv_insn_hfencevvma;
             break;
         }
 

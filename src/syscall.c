@@ -38,6 +38,7 @@
         _(sbi_base,         0x10)          \
         _(sbi_timer,        0x54494D45)    \
         _(sbi_rst,          0x53525354)    \
+        _(sbi_rfence,          0x52464E43)    \
     )                                      \
     IIF(RV32_HAS(SDL))(                    \
         _(draw_frame,       0xBEEF)        \
@@ -431,11 +432,50 @@ static void syscall_sbi_base(riscv_t *rv)
     case SBI_BASE_PROBE_EXTENSION: {
         const riscv_word_t eid = rv_get_reg(rv, rv_reg_a0);
         bool available =
-            eid == SBI_EID_BASE || eid == SBI_EID_TIMER || eid == SBI_EID_RST;
+            eid == SBI_EID_BASE || eid == SBI_EID_TIMER || eid == SBI_EID_RST || eid == 0x52464E43;
         rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
         rv_set_reg(rv, rv_reg_a1, available);
         break;
     }
+    default:
+        rv_set_reg(rv, rv_reg_a0, SBI_ERR_NOT_SUPPORTED);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    }
+}
+
+static void syscall_sbi_rfence(riscv_t *rv)
+{
+    const riscv_word_t fid = rv_get_reg(rv, rv_reg_a6);
+    const riscv_word_t a0 = rv_get_reg(rv, rv_reg_a0);
+    const riscv_word_t a1 = rv_get_reg(rv, rv_reg_a1);
+
+    switch (fid) {
+    case 0:
+       // fprintf(stderr, "system reset: type=%u, reason=%u\n", a0, a1);
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    case 1:
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    case 2:
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    case 3:
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    case 4:
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
+    case 5:
+        rv_set_reg(rv, rv_reg_a0, SBI_SUCCESS);
+        rv_set_reg(rv, rv_reg_a1, 0);
+        break;
     default:
         rv_set_reg(rv, rv_reg_a0, SBI_ERR_NOT_SUPPORTED);
         rv_set_reg(rv, rv_reg_a1, 0);
