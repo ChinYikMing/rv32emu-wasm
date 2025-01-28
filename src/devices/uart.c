@@ -3,7 +3,6 @@
  * "LICENSE" for information on usage and redistribution of this file.
  */
 
-#include <SDL.h>
 #include <assert.h>
 #include <errno.h>
 #include <poll.h>
@@ -11,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <SDL.h>
+#include <SDL_mixer.h>
 
 #include "uart.h"
 
@@ -82,11 +84,27 @@ static uint8_t u8250_handle_in(u8250_state_t *uart)
      * then close it.
      */
 
-    extern void shutdown_audio();
-    extern SDL_Window *window;
-    if (value == 3 && window){ /* start of heading (Ctrl-c) */
-	shutdown_audio();
-        SDL_CLEANUP(window);
+    SDL_VIDEO_AUDIO_DECL();
+    extern bool audio_init;
+    if (value == 3 && window) { /* start of heading (Ctrl-c) */
+        printf("Ctrl-C exit\n");
+
+        bool sfx_or_music_thread_init = sfx_thread_init | music_thread_init;
+        SDL_VIDEO_AUDIO_CLEANUP(window, shutdown_audio,
+                                sfx_or_music_thread_init);
+
+        /*
+         * sfx_or_music_init might not be true when a very quick Ctrl-c
+         * reaches but the audio configuration has been initialized. Thus, we
+         * have to deinitialize them by checking if they are set. Mix_QuerySpec
+         * returns true if Audio has been opened.
+         */
+        if (!sfx_or_music_thread_init && audio_init) {
+            Mix_CloseAudio();
+            Mix_Quit();
+            audio_init = false;
+            printf("Mix_Quit() CTRL-C\n");
+        }
     }
 #endif
 
