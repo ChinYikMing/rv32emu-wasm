@@ -74,6 +74,10 @@ static uint8_t *sfx_samples;
 static uint32_t nr_sfx_samples;
 static int chan;
 
+bool audio_init = false;
+bool sfx_thread_init = false;
+bool music_thread_init = false;
+
 typedef struct {
     void *data;
     int size;
@@ -819,6 +823,7 @@ static void play_sfx(riscv_t *rv)
         .volume = volume,
     };
     pthread_create(&sfx_thread, NULL, sfx_handler, &sfx);
+    sfx_thread_init = true;
     /* FIXME: In web browser runtime, web workers in thread pool do not reap
      * after sfx_handler return, thus we have to join them. sfx_handler does not
      * contain infinite loop,so do not worry to be stalled by it */
@@ -874,6 +879,7 @@ static void play_music(riscv_t *rv)
         .volume = volume,
     };
     pthread_create(&music_thread, NULL, music_handler, &music);
+    music_thread_init = true;
     /* FIXME: In web browser runtime, web workers in thread pool do not reap
      * after music_handler return, thus we have to join them. music_handler does
      * not contain infinite loop,so do not worry to be stalled by it */
@@ -922,26 +928,43 @@ static void init_audio(void)
         Mix_Quit();
         exit(1);
     }
+    audio_init = true;
 }
 
 void shutdown_audio()
 {
     /*
-     * To avoid main thread exit before them
-     * since they might access invalid memory
+     * sfx_thread and music_thread might be have invalid identifier.
+     * In addition, there is no method to determine if the validness
+     * of pthread_t type. Thus, sfx_thread_init and music_thread_init
+     * flag are used to do such validation. Thus, the pthread_cancel
+     * will be always use valid pthread_t identifier.
      */
-    pthread_join(sfx_thread, NULL);
-    pthread_join(music_thread, NULL);
 
-    stop_music();
-    Mix_HaltChannel(-1);
+    if (music_thread_init) {
+        stop_music();
+        int ret = pthread_join(music_thread, NULL);
+        Mix_FreeMusic(mid);
+        free(music_midi_data);
+        music_midi_data = NULL;
+        printf("reap music_thread, ret: %d\n", ret);
+    }
+
+    if (sfx_thread_init) {
+        int ret = pthread_join(sfx_thread, NULL);
+        Mix_HaltChannel(-1);
+        Mix_FreeChunk(sfx_chunk);
+        free(sfx_samples);
+        sfx_samples = NULL;
+        printf("reap sfx_thread, ret: %d\n", ret);
+    }
+
+    printf("Mix_Quit() in normal flow\n");
     Mix_CloseAudio();
     Mix_Quit();
 
-    free(music_midi_data);
-    music_midi_data = NULL;
-    free(sfx_samples);
-    sfx_samples = NULL;
+    audio_init = sfx_thread_init = music_thread_init = false;
+    printf("reset audio, sfx and music init\n");
 }
 
 void syscall_setup_audio(riscv_t *rv)

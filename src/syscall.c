@@ -3,13 +3,14 @@
  * "LICENSE" for information on usage and redistribution of this file.
  */
 
-#include <SDL.h>
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+
+#include <SDL.h>
 
 #include "riscv.h"
 #include "riscv_private.h"
@@ -142,9 +143,12 @@ static void syscall_exit(riscv_t *rv)
      * builtin exit function. We have to trap the buildin exit
      * and close the SDL window properly.
      */
-    extern SDL_Window *window;
+    SDL_VIDEO_AUDIO_DECL();
     if (window) {
-        SDL_CLEANUP(window);
+        printf("Builtin exit\n");
+        bool sfx_or_music_thread_init = sfx_thread_init | music_thread_init;
+        SDL_VIDEO_AUDIO_CLEANUP(window, shutdown_audio,
+                                sfx_or_music_thread_init);
         return;
     }
 #endif
