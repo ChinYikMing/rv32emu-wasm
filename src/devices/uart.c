@@ -11,8 +11,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "uart.h"
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+#include <SDL.h>
+#include <SDL_mixer.h>
 
+#include "utils.h"
+#endif
+
+#include "uart.h"
 /* Emulate 8250 (plain, without loopback mode support) */
 
 #define U8250_INTR_THRE 1
@@ -66,9 +72,37 @@ static uint8_t u8250_handle_in(u8250_state_t *uart)
     if (value == 1) {           /* start of heading (Ctrl-a) */
         if (getchar() == 120) { /* keyboard x */
             printf("\n");       /* end emulator with newline */
-            exit(0);
+            exit(EXIT_SUCCESS);
         }
     }
+
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+    /*
+     * The guestOS may repeatedly open and close the SDL window,
+     * and the user could close the application by pressing the ctrl-c key.
+     * Need to trap the ctrl-c key and ensure the SDL window and
+     * SDL mixer are destroyed properly.
+     */
+    SDL_VIDEO_AUDIO_DECL();
+    extern bool audio_init;
+    if (value == 3 /* ctrl-c */ && window) {
+        bool sfx_or_music_thread_init = sfx_thread_init | music_thread_init;
+        SDL_VIDEO_AUDIO_CLEANUP(window, shutdown_audio,
+                                sfx_or_music_thread_init);
+
+        /*
+         * The sfx_or_music_init flag might not be set if a quick ctrl-c
+         * occurs while the audio configuration is being initialized.
+         * Therefore, need to destroy the audio settings by checking
+         * audio_init flag.
+         */
+        if (!sfx_or_music_thread_init && audio_init) {
+            Mix_CloseAudio();
+            Mix_Quit();
+            audio_init = false;
+        }
+    }
+#endif
 
     return value;
 }

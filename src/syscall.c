@@ -10,6 +10,10 @@
 #include <string.h>
 #include <sys/time.h>
 
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+#include <SDL.h>
+#endif
+
 #include "riscv.h"
 #include "riscv_private.h"
 #include "utils.h"
@@ -132,9 +136,24 @@ error_handler:
     rv_set_reg(rv, rv_reg_a0, -1);
 }
 
-
 static void syscall_exit(riscv_t *rv)
 {
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+    /*
+     * The guestOS may repeatedly open and close the SDL window,
+     * and the user could close the application using the application’s
+     * built-in exit function. Need to trap the built-in exit and
+     * ensure the SDL window and SDL mixer are destroyed properly.
+     */
+    SDL_VIDEO_AUDIO_DECL();
+    if (window) {
+        bool sfx_or_music_thread_init = sfx_thread_init | music_thread_init;
+        SDL_VIDEO_AUDIO_CLEANUP(window, shutdown_audio,
+                                sfx_or_music_thread_init);
+        return;
+    }
+#endif
+
     /* simply halt cpu and save exit code.
      * the application decides the usage of exit code
      */

@@ -159,3 +159,20 @@ bool set_add(set_t *set, uint32_t key);
  * @key: the key of the inserted entry
  */
 bool set_has(set_t *set, uint32_t key);
+
+#if RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
+#define SDL_VIDEO_AUDIO_DECL()    \
+    extern SDL_Window *window;    \
+    extern void shutdown_audio(); \
+    extern bool sfx_thread_init, music_thread_init;
+
+#define SDL_VIDEO_AUDIO_CLEANUP(window, shutdown_audio_callback, \
+                                sfx_or_music_thread_init)        \
+    do {                                                         \
+        SDL_DestroyWindow(window);                               \
+        window = NULL;                                           \
+        if (sfx_or_music_thread_init)                            \
+            shutdown_audio_callback();                           \
+        SDL_Quit();                                              \
+    } while (0)
+#endif /* RV32_HAS(SDL) && RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER) */
