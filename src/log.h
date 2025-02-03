@@ -49,12 +49,26 @@ enum LOG_LEVEL {
     LOG_FATAL,
 };
 
-#define log_trace(...) log_impl(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
-#define log_debug(...) log_impl(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-#define log_info(...) log_impl(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
-#define log_warn(...) log_impl(LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
-#define log_error(...) log_impl(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define log_fatal(...) log_impl(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+/* lowest level logging */
+#define rv_log_trace(...) log_impl(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
+#define rv_log_debug(...) log_impl(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+#define rv_log_info(...) log_impl(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
+#define rv_log_warn(...) log_impl(LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
+#define rv_log_error(...) log_impl(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+#define rv_log_fatal(...) log_impl(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+/* highest level logging */
+
+#define rv_log_level_string(...) log_level_lock(__VA_ARGS__)
+#define rv_log_set_lock(...) log_set_lock(__VA_ARGS__)
+#define rv_log_set_level(...) log_set_level(__VA_ARGS__)
+#define rv_log_set_quiet(...) log_set_quiet(__VA_ARGS__)
+/*
+ * By default, log messages are directed to stdout. However,
+ * rv_remap_stdstream() may redirect stdout to a different target, such as a
+ * file. Therefore, rv_log_set_stdout_stream() should be invoked within
+ * rv_remap_stdstream() to properly handle any changes to the stdout stream.
+ */
+#define rv_log_set_stdout_stream(...) log_set_stdout_stream(__VA_ARGS__)
 
 const char *log_level_string(int level);
 void log_set_lock(log_lock_func_t fn, void *udata);
@@ -65,6 +79,8 @@ void log_set_stdout_stream(FILE *stream);
 #if RV32_HAS(LOG_CALLBACK)
 int log_add_callback(log_func_t fn, void *udata, int level);
 int log_add_fp(FILE *fp, int level);
+#define rv_log_add_callback(...) log_add_callback(__VA_ARGS__)
+#define rv_log_add_fp(...) log_add_fp(__VA_ARGS__)
 #endif
 
 void log_impl(int level, const char *file, int line, const char *fmt, ...);

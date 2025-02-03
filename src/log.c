@@ -22,15 +22,15 @@
 
 #include "log.h"
 
+#if RV32_HAS(LOG_CALLBACK)
 #define MAX_CALLBACKS 32
 
-#if RV32_HAS(LOG_CALLBACK)
 typedef struct {
     log_func_t fn;
     void *udata;
     int level;
 } callback_t;
-#endif
+#endif /* RV32_HAS(LOG_CALLBACK) */
 
 static struct {
     void *udata;
@@ -39,7 +39,7 @@ static struct {
     bool quiet;
 #if RV32_HAS(LOG_CALLBACK)
     callback_t callbacks[MAX_CALLBACKS];
-#endif
+#endif /* RV32_HAS(LOG_CALLBACK) */
 } L;
 
 static const char *level_strings[] = {"TRACE", "DEBUG", "INFO",
@@ -48,7 +48,7 @@ static const char *level_strings[] = {"TRACE", "DEBUG", "INFO",
 #if RV32_HAS(LOG_COLOR)
 static const char *level_colors[] = {"\x1b[94m", "\x1b[36m", "\x1b[32m",
                                      "\x1b[33m", "\x1b[31m", "\x1b[35m"};
-#endif
+#endif /* RV32_HAS(LOG_COLOR) */
 
 static void stdout_callback(log_event_t *ev)
 {
@@ -61,7 +61,7 @@ static void stdout_callback(log_event_t *ev)
 #else
     fprintf(ev->udata, "%s %-5s %s:%d: ", buf, level_strings[ev->level],
             ev->file, ev->line);
-#endif
+#endif /* RV32_HAS(LOG_COLOR) */
     vfprintf(ev->udata, ev->fmt, ev->ap);
     fprintf(ev->udata, "\n");
     fflush(ev->udata);
@@ -78,7 +78,7 @@ static void file_callback(log_event_t *ev)
     fprintf(ev->udata, "\n");
     fflush(ev->udata);
 }
-#endif
+#endif /* RV32_HAS(LOG_CALLBACK) */
 
 static void lock(void)
 {
@@ -129,7 +129,7 @@ int log_add_fp(FILE *fp, int level)
 {
     return log_add_callback(file_callback, fp, level);
 }
-#endif
+#endif /* RV32_HAS(LOG_CALLBACK) */
 
 static void init_event(log_event_t *ev, void *udata)
 {
@@ -173,7 +173,7 @@ void log_impl(int level, const char *file, int line, const char *fmt, ...)
             va_end(ev.ap);
         }
     }
-#endif
+#endif /* RV32_HAS(LOG_CALLBACK) */
 
     unlock();
 }

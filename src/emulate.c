@@ -1346,7 +1346,7 @@ void dump_registers(riscv_t *rv, char *out_file_path)
 {
     FILE *f = out_file_path[0] == '-' ? stdout : fopen(out_file_path, "w");
     if (!f) {
-        rv_log_error("Cannot open registers output file");
+        rv_log_error("cannot open registers output file");
         return;
     }
 

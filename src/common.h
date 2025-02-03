@@ -142,64 +142,6 @@ static inline uint8_t ilog2(uint32_t x)
     return 31 - rv_clz(x);
 }
 
-/* Logging API */
-/*
- * ...   : FILE *fp
- * return: void
- *
- * Used in rv_remap_stdstream() since stdout might be remapped.
- * If not used, default to stdout.
- */
-#define rv_log_set_stdout_stream(...) log_set_stdout_stream(__VA_ARGS__)
-/*
- * ...   : int level
- * return: char *
- */
-#define rv_log_level_string(...) log_level_lock(__VA_ARGS__)
-/*
- * ...   : void (*lock_func_t)(bool lock, void *udata), void *udata (pointer to a stream)
- * return: void
- *
- * For thread-safety
- */
-#define rv_log_set_lock(...) log_set_lock(__VA_ARGS__)
-/*
- * ...   : int level
- * return: void
- */
-#define rv_log_set_level(...) log_set_level(__VA_ARGS__)
-/*
- * ...   : bool enable
- * return: void
- */
-#define rv_log_set_quiet(...) log_set_quiet(__VA_ARGS__)
-/* lowest level logging */
-#define rv_log_trace(...) log_trace(__VA_ARGS__)
-#define rv_log_debug(...) log_debug(__VA_ARGS__)
-#define rv_log_info(...) log_info(__VA_ARGS__)
-#define rv_log_warn(...) log_warn(__VA_ARGS__)
-#define rv_log_error(...) log_error(__VA_ARGS__)
-/* highest level logging */
-#define rv_log_fatal(...) log_fatal(__VA_ARGS__)
-
-#if RV32_HAS(ENABLE_LOG_CALLBACK)
-/*
- * ...   : void (*log_func_t)(log_event_t *ev),
- *         void *udata (pointer to a stream), int level
- * return: int
- *
- * register log_func_t as callback and output to udata at 'level' log level
- */
-#define rv_log_add_callback(...) log_add_callback(__VA_ARGS__)
-/*
- * ...   : FILE *fp, int level
- * return: int
- *
- * more FILR * stream to be written
- */
-#define rv_log_add_fp(...) log_add_fp(__VA_ARGS__)
-#endif
-
 /* Alignment macro */
 #if defined(__GNUC__) || defined(__clang__)
 #define __ALIGNED(x) __attribute__((aligned(x)))

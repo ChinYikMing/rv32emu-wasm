@@ -166,8 +166,6 @@ void rv_remap_stdstream(riscv_t *rv, fd_stream_pair_t *fsp, uint32_t fsp_size)
             attr->fd_stdin = new_fd;
         else if (fd == STDOUT_FILENO) {
             attr->fd_stdout = new_fd;
-
-            /* logging stdout stream */
             rv_log_set_stdout_stream(file);
         } else
             attr->fd_stderr = new_fd;
@@ -483,7 +481,7 @@ riscv_t *rv_create(riscv_user_t rv_attr)
 
     char *ram_loc = (char *) attr->mem->mem_base;
     map_file(&ram_loc, attr->data.system.kernel);
-    rv_log_info("Kernel loaded");
+    rv_log_info("kernel loaded");
 
     uint32_t dtb_addr = attr->mem->mem_size - DTB_SIZE;
     ram_loc = ((char *) attr->mem->mem_base) + dtb_addr;
@@ -497,7 +495,7 @@ riscv_t *rv_create(riscv_user_t rv_attr)
         uint32_t initrd_addr = dtb_addr - INITRD_SIZE;
         ram_loc = ((char *) attr->mem->mem_base) + initrd_addr;
         map_file(&ram_loc, attr->data.system.initrd);
-        rv_log_info("Rootfs loaded");
+        rv_log_info("rootfs loaded");
     }
 
     /* this variable has external linkage to mmu_io defined in system.c */
@@ -868,12 +866,12 @@ static void profile(block_t *block, uint32_t freq, FILE *output_file)
 void rv_profile(riscv_t *rv, char *out_file_path)
 {
     if (!out_file_path) {
-        rv_log_error("Profiling data output file is NULL");
+        rv_log_warn("profiling data output file is NULL");
         return;
     }
     FILE *f = fopen(out_file_path, "w");
     if (!f) {
-        rv_log_error("Cannot open profiling data output file");
+        rv_log_error("cannot open profiling data output file");
         return;
     }
 #if RV32_HAS(JIT)

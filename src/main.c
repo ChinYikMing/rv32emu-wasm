@@ -72,10 +72,10 @@ static void print_usage(const char *filename)
         "  -g : allow remote GDB connections (as gdbstub)\n"
 #endif
 #if RV32_HAS(SYSTEM) && !RV32_HAS(ELF_LOADER)
-            "  -k <image> : use <image> as kernel image\n"
-            "  -i <image> : use <image> as rootfs\n"
-            "  -x vblk:<image> : use <image> as virtio-blk disk image\n"
-            "  -b <bootargs> : use customized <bootargs> for the kernel\n"
+        "  -k <image> : use <image> as kernel image\n"
+        "  -i <image> : use <image> as rootfs\n"
+        "  -x vblk:<image> : use <image> as virtio-blk disk image\n"
+        "  -b <bootargs> : use customized <bootargs> for the kernel\n"
 #endif
         "  -d [filename]: dump registers as JSON to the "
         "given file or `-` (STDOUT)\n"
@@ -278,7 +278,7 @@ int main(int argc, char **args)
         attr.exit_code = 1;
         goto end;
     }
-    rv_log_info("RISC-V emulator is created successfully and ready to run");
+    rv_log_info("RISC-V emulator is created and ready to run");
 
     rv_run(rv);
 
@@ -292,9 +292,7 @@ int main(int argc, char **args)
 
     /* finalize the RISC-V runtime */
     rv_delete(rv);
-    rv_log_info("RISC-V emulator is destroyed successfully");
-
-    rv_log_info("inferior exit code %d", attr.exit_code);
+    rv_log_info("RISC-V emulator is destroyed");
 
 end:
     free(prof_out_file);
