@@ -131,20 +131,14 @@ ifeq ($(call has, PREBUILT), 1)
 ifeq ($(call has, SYSTEM), 1)
 ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-image)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-image https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
-else
-	$(info "Not fetch again sha1 linux-image!")
 endif
 	$(Q)$(call notice, [OK])
 else
 ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-x86-softfp)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
-else
-	$(info "Not fetch again sha1 linux-x86-softfp!")
 endif
 ifeq ("$(wildcard $(BIN_DIR)/sha1sum-riscv32)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
-else
-	$(info "Not fetch again sha1 riscv32!")
 endif
 	$(Q)$(call notice, [OK])
 endif
