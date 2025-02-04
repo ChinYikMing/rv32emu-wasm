@@ -135,17 +135,17 @@ ifeq ($(call has, PREBUILT), 1)
 	$(Q)$(PRINTF) "Fetching SHA-1 of prebuilt binaries ... "
 
 ifeq ($(call has, SYSTEM), 1)
-$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-image)
+	$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-image)
 ifeq ("$(file_entry)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-image https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
 endif
 	$(Q)$(call notice, [OK])
 else
-$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-x86-softfp)
+	$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-x86-softfp)
 ifeq ("$(file_entry)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
 endif
-$(call check-file-exist, $(BIN_DIR)/sha1sum-riscv32)
+	$(call check-file-exist, $(BIN_DIR)/sha1sum-riscv32)
 ifeq ("$(file_entry)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
 endif
