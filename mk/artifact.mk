@@ -125,28 +125,19 @@ else
 endif
 endif
 
-# $(1) file path to be checked
-define check-file-exist
-$(eval file_entry := $(wildcard $(1)))
-endef
-
 fetch-checksum:
 ifeq ($(call has, PREBUILT), 1)
 	$(Q)$(PRINTF) "Fetching SHA-1 of prebuilt binaries ... "
-
 ifeq ($(call has, SYSTEM), 1)
-	$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-image)
-ifeq ("$(file_entry)", "")
+ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-image)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-image https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
 endif
 	$(Q)$(call notice, [OK])
 else
-	$(call check-file-exist, $(BIN_DIR)/sha1sum-linux-x86-softfp)
-ifeq ("$(file_entry)", "")
+ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-x86-softfp)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
 endif
-	$(call check-file-exist, $(BIN_DIR)/sha1sum-riscv32)
-ifeq ("$(file_entry)", "")
+ifeq ("$(wildcard $(BIN_DIR)/sha1sum-riscv32)", "")
 	$(Q)wget -q -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
 endif
 	$(Q)$(call notice, [OK])
