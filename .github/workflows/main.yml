@@ -229,7 +229,7 @@ jobs:
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
-            make distclean && make INITRD_SIZE=32 ENABLE_SYSTEM=1 -j$(nproc) && make ENABLE_SYSTEM=1 artifact -j$(nproc)
+            make distclean && make INITRD_SIZE=32 ENABLE_SYSTEM=1 -j$(nproc) && make artifact ENABLE_SYSTEM=1
             .ci/boot-linux.sh
             make ENABLE_SYSTEM=1 clean
       if: ${{ always() }}
