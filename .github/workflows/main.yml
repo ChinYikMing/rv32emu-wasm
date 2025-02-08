@@ -46,7 +46,6 @@ jobs:
     - name: install-dependencies
       run: |
             brew install make dtc expect
-            .ci/riscv-toolchain-install.sh
     - name: Install compiler
       id: install_cc
       uses: rlalik/setup-cpp-compiler@master
