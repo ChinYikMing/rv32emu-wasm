@@ -32,6 +32,7 @@ jobs:
           else
             echo "has_code_related_changes=false" >> $GITHUB_OUTPUT
           fi
+
   macOS:
     needs: [detect-code-related-file-changes]
     if: needs.detect-code-related-file-changes.outputs.has_code_related_changes == 'true'
