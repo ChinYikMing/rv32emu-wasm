@@ -40,12 +40,12 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [gcc, clang]
-    runs-on: macos-latest
+    runs-on: ubuntu-24.04
     steps:
-     - uses: actions/checkout@v4
-     - name: install-dependencies
-       run: |
-             brew install make dtc expect
+    - uses: actions/checkout@v4
+    - name: install-dependencies
+      run: |
+            brew install make dtc expect
     - name: Install compiler
       id: install_cc
       uses: rlalik/setup-cpp-compiler@master
