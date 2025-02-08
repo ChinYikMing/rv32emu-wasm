@@ -32,6 +32,120 @@ jobs:
           else
             echo "has_code_related_changes=false" >> $GITHUB_OUTPUT
           fi
+  macOS:
+    needs: [detect-code-related-file-changes]
+    if: needs.detect-code-related-file-changes.outputs.has_code_related_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    runs-on: macos-latest
+    steps:
+     - uses: actions/checkout@v4
+     - name: install-dependencies
+       run: |
+             brew install make dtc expect
+    - name: Install compiler
+      id: install_cc
+      uses: rlalik/setup-cpp-compiler@master
+      with:
+        compiler: ${{ matrix.compiler }}
+    - name: default build with -g
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: make OPT_LEVEL=-g -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -Og
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -O0
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -O1
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -O2
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -O3
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build with -Ofast
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -g
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-g ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Og
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O0
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O1
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O2
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O3
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Ofast
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(nproc)
+      if: ${{ always() }}
 
   host-x64:
     needs: [detect-code-related-file-changes]
