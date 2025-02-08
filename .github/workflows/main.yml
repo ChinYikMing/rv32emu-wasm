@@ -54,98 +54,98 @@ jobs:
     - name: default build with -g
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
-      run: make OPT_LEVEL=-g -j$(nproc)
+      run: make OPT_LEVEL=-g -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -Og
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-Og -j$(nproc)
+            make OPT_LEVEL=-Og -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -O0
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O0 -j$(nproc)
+            make OPT_LEVEL=-O0 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -O1
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O1 -j$(nproc)
+            make OPT_LEVEL=-O1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -O2
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O2 -j$(nproc)
+            make OPT_LEVEL=-O2 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -O3
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O3 -j$(nproc)
+            make OPT_LEVEL=-O3 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -Ofast
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-Ofast -j$(nproc)
+            make OPT_LEVEL=-Ofast -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -g
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-g ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-g ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -Og
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-Og ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-Og ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -O0
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O0 ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-O0 ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -O1
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O1 ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-O1 ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -O2
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O2 ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-O2 ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -O3
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-O3 ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-O3 ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build for system emulation with -Ofast
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             make distclean
-            make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(nproc)
+            make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
 
   host-x64:
