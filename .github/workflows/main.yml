@@ -46,6 +46,7 @@ jobs:
     - name: install-dependencies
       run: |
             brew install make dtc expect
+            .ci/riscv-toolchain-install.sh
     - name: Install compiler
       id: install_cc
       uses: rlalik/setup-cpp-compiler@master
@@ -353,6 +354,16 @@ jobs:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: |
             .ci/riscv-tests.sh
+      if: ${{ always() }}
+    - name: check + tests
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make check -j$(nproc)
+            make tests -j$(nproc)
+            make misalign -j$(nproc)
+            make tool -j$(nproc)
       if: ${{ always() }}
 
   host-arm64:
