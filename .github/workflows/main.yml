@@ -188,6 +188,16 @@ jobs:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: make OPT_LEVEL=-g -j$(nproc)
       if: ${{ always() }}
+    - name: check + tests
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make check -j$(nproc)
+            make tests -j$(nproc)
+            make misalign -j$(nproc)
+            make tool -j$(nproc)
+      if: ${{ always() }}
     - name: default build with -Og
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
@@ -278,16 +288,6 @@ jobs:
       run: |
             make distclean
             make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(nproc)
-      if: ${{ always() }}
-    - name: check + tests
-      env:
-        CC: ${{ steps.install_cc.outputs.cc }}
-      run: |
-            make distclean
-            make check -j$(nproc)
-            make tests -j$(nproc)
-            make misalign -j$(nproc)
-            make tool -j$(nproc)
       if: ${{ always() }}
     - name: diverse configurations
       env:
