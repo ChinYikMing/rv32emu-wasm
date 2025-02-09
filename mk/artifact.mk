@@ -129,17 +129,12 @@ fetch-checksum:
 ifeq ($(call has, PREBUILT), 1)
 	$(Q)$(PRINTF) "Fetching SHA-1 of prebuilt binaries ... "
 ifeq ($(call has, SYSTEM), 1)
-ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-image)", "")
-	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-image https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
-endif
+	$(Q)wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-linux-image https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
 	$(Q)$(call notice, [OK])
 else
-ifeq ("$(wildcard $(BIN_DIR)/sha1sum-linux-x86-softfp)", "")
-	$(Q)wget -q -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
-endif
-ifeq ("$(wildcard $(BIN_DIR)/sha1sum-riscv32)", "")
-	$(Q)wget -q -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
-endif
+	wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
+	wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
+	$(info "https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32")
 	$(Q)$(call notice, [OK])
 endif
 endif
