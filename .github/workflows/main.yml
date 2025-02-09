@@ -40,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [clang]
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - name: install-dependencies
@@ -55,6 +55,16 @@ jobs:
       env:
         CC: ${{ steps.install_cc.outputs.cc }}
       run: make OPT_LEVEL=-g -j$(sysctl -n hw.ncpu)
+      if: ${{ always() }}
+    - name: check + tests
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make check -j$(sysctl -n hw.ncpu)
+            make tests -j$(sysctl -n hw.ncpu)
+            make misalign -j$(sysctl -n hw.ncpu)
+            make tool -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
     - name: default build with -Og
       env:
@@ -146,16 +156,6 @@ jobs:
       run: |
             make distclean
             make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
-      if: ${{ always() }}
-    - name: check + tests
-      env:
-        CC: ${{ steps.install_cc.outputs.cc }}
-      run: |
-            make distclean
-            make check -j$(sysctl -n hw.ncpu)
-            make tests -j$(sysctl -n hw.ncpu)
-            make misalign -j$(sysctl -n hw.ncpu)
-            make tool -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
 
   host-x64:
