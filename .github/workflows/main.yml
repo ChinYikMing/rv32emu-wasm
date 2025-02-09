@@ -147,6 +147,16 @@ jobs:
             make distclean
             make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(sysctl -n hw.ncpu)
       if: ${{ always() }}
+    - name: check + tests
+      env:
+        CC: ${{ steps.install_cc.outputs.cc }}
+      run: |
+            make distclean
+            make check -j$(sysctl -n hw.ncpu)
+            make tests -j$(sysctl -n hw.ncpu)
+            make misalign -j$(sysctl -n hw.ncpu)
+            make tool -j$(sysctl -n hw.ncpu)
+      if: ${{ always() }}
 
   host-x64:
     needs: [detect-code-related-file-changes]
