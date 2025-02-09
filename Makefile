@@ -357,27 +357,23 @@ EXPECTED_pi = 3.1415926535897932384626433832795028841971693993751058209749445923
 
 LOG_FILTER=sed -E '/^[0-9]{2}:[0-9]{2}:[0-9]{2} /d'
 
-define exec
-$(eval OUTPUT_FILE := $(shell mktemp))
-$(eval _ := $(shell LC_ALL=C $(BIN) $(1) $(2) > $(OUTPUT_FILE)))
-$(eval RC := $(.SHELLSTATUS))
-endef
-
 # $(1): rv32emu's extra CLI parameter
 # $(2): ELF executable
 # $(3): ELF executable name
 # $(4): extra command in the pipeline
 # $(5): expected output
 define check-test
-$(call exec, $(1), $(2))
-$(Q)$(PRINTF) "Running $(3) ... "; \
-if [ 0 -eq $(RC) ] && [ "$(strip $(shell cat $(OUTPUT_FILE) | $(LOG_FILTER) | $(4)))" = "$(strip $(5))" ]; then \
+$(Q)true; \
+$(PRINTF) "Running $(3) ... "; \
+OUTPUT_FILE="$$(mktemp)"; \
+if (LC_ALL=C $(BIN) $(1) $(2) > "$$OUTPUT_FILE") && \
+   [ "$$(cat "$$OUTPUT_FILE" | $(LOG_FILTER) | $(4))" = "$(strip $(5))" ]; then \
     $(call notice, [OK]); \
 else \
     $(PRINTF) "Failed.\n"; \
     exit 1; \
 fi; \
-$(RM) $(OUTPUT_FILE)
+$(RM) "$$OUTPUT_FILE"
 endef
 
 check-hello: $(BIN)
