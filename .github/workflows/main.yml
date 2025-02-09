@@ -45,7 +45,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: install-dependencies
       run: |
-            brew install make dtc expect
+            brew install make dtc sdl2 sdl2_mixer
     - name: Install compiler
       id: install_cc
       uses: rlalik/setup-cpp-compiler@master
