@@ -38,9 +38,9 @@ SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(
 
 ifeq ($(call has, PREBUILT), 1)
 ifeq ($(call has, SYSTEM), 1)
-  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "Linux-Image" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/ChinYikMing/prebuilt/releases -O- | grep '"tag_name"' | grep "Linux-Image" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
 else
-  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "ELF" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/ChinYikMing/prebuilt/releases -O- | grep '"tag_name"' | grep "ELF" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
 endif
 else
   # Since rv32emu only supports the dynamic binary translation of integer instruction in tiered compilation currently,
