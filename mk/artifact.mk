@@ -38,9 +38,9 @@ SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(
 
 ifeq ($(call has, PREBUILT), 1)
 ifeq ($(call has, SYSTEM), 1)
-  LATEST_RELEASE := $(shell wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "Linux-Image" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "Linux-Image" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
 else
-  LATEST_RELEASE := $(shell wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "ELF" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
+  LATEST_RELEASE := $(shell wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- | grep '"tag_name"' | grep "ELF" | head -n 1 | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')
 endif
 else
   # Since rv32emu only supports the dynamic binary translation of integer instruction in tiered compilation currently,
@@ -83,7 +83,7 @@ endif
 
 	$(Q)if [ "$(RES)" = "1" ]; then \
 	    $(PRINTF) "\n$(YELLOW)SHA-1 verification fails! Re-fetching prebuilt binaries from \"rv32emu-prebuilt\" ...\n$(NO_COLOR)"; \
-	    wget -q --show-progress https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/$(RV32EMU_PREBUILT_TARBALL) -O- | tar -C build --strip-components=1 -xz; \
+	    $(Q)wget -q --show-progress https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/$(RV32EMU_PREBUILT_TARBALL) -O- | tar -C build --strip-components=1 -xz; \
 	else \
 	    $(call notice, [OK]); \
 	fi
@@ -129,11 +129,11 @@ fetch-checksum:
 ifeq ($(call has, PREBUILT), 1)
 	$(Q)$(PRINTF) "Fetching SHA-1 of prebuilt binaries ... "
 ifeq ($(call has, SYSTEM), 1)
-	$(Q)curl -s -H "Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -o $(BIN_DIR)/sha1sum-linux-image -L "https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image"
+	$(Q)wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-linux-image https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-image
 	$(Q)$(call notice, [OK])
 else
-	$(Q)curl -s -H "Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -o $(BIN_DIR)/sha1sum-linux-x86-softfp -L "https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp"
-	$(Q)curl -s -H "Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -o $(BIN_DIR)/sha1sum-riscv32 -L "https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32"
+	$(Q)wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-linux-x86-softfp https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-linux-x86-softfp
+	$(Q)wget -q --header="Authorization: Bearer ${{ secrets.RV32EMU_PREBUILT_TOKEN }}" -O $(BIN_DIR)/sha1sum-riscv32 https://github.com/ChinYikMing/prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32
 	$(info "https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)/sha1sum-riscv32")
 	$(Q)$(call notice, [OK])
 endif
