@@ -544,6 +544,7 @@ static void emit_dataproc_2source(struct jit_state *state,
 }
 
 
+#if defined(__aarch64__)
 /* [ARM-A]: C4.1.67: Data-processing (3 source).  */
 static void emit_dataproc_3source(struct jit_state *state,
                                   bool is64,
@@ -556,6 +557,7 @@ static void emit_dataproc_3source(struct jit_state *state,
     emit_a64(state, sz(is64) | op | (rm << 16) | (ra << 10) | (rn << 5) | rd);
     set_dirty(rd, true);
 }
+#endif
 
 static void update_branch_imm(struct jit_state *state,
                               uint32_t offset,
