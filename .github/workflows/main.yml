@@ -258,10 +258,7 @@ jobs:
      - uses: actions/checkout@v4
      - name: install-dependencies
        run: |
-             brew install make dtc expect sdl2 sdl2_mixer bc p7zip
-             wget https://apt.llvm.org/llvm.sh
-             sudo chmod +x ./llvm.sh
-             sudo ./llvm.sh 18
+             brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18
              # TODO: install xPack toolchain
      - name: fetch artifact first to reduce HTTP requests
        run: |
