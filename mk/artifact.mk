@@ -62,7 +62,7 @@ define fetch-releases-tag
                         | head -n 1 \
                         | sed -E 's/.*"tag_name": "([^"]+)".*/\1/'); \
                     if [ -n "$$TAG" ]; then echo $$TAG; break; fi; \
-                    i=$$((i+1)); sleep 1; \
+                    i=$$((i+1)); sleep 2; \
                 done \
             )) \
         ) \
