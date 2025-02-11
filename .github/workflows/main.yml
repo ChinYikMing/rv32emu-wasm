@@ -260,6 +260,8 @@ jobs:
        run: |
              brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18
              # TODO: install xPack toolchain
+             .ci/riscv-toolchain-install.sh
+             echo "${{ github.workspace }}/toolchain/bin" >> $GITHUB_PATH
      - name: fetch artifact first to reduce HTTP requests
        run: |
              make artifact
@@ -360,10 +362,10 @@ jobs:
              make distclean && make ENABLE_Zbs=0 check -j$(sysctl -n hw.logicalcpu)
              make distclean && make ENABLE_Zifencei=0 check -j$(sysctl -n hw.logicalcpu)
        if: ${{ always() }}
-         #- name: gdbstub test, need RV32 toolchain
-         #  run: |
-         #        make distclean && make ENABLE_GDBSTUB=1 gdbstub-test -j$(sysctl -n hw.logicalcpu)
-         #  if: ${{ always() }}
+     - name: gdbstub test, need RV32 toolchain
+       run: |
+             make distclean && make ENABLE_GDBSTUB=1 gdbstub-test -j$(sysctl -n hw.logicalcpu)
+       if: ${{ always() }}
      - name: JIT test
        run: |
              make ENABLE_JIT=1 clean && make ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)

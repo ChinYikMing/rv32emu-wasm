@@ -1,4 +1,4 @@
-PREFIX ?= riscv-none-elf-
+PREFIX ?= riscv32-unknown-elf-
 ARCH = -march=rv32izicsr
 LINKER_SCRIPT = linker.ld
 
