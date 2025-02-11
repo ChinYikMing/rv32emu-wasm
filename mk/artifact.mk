@@ -51,16 +51,18 @@ define fetch-releases-tag
         )) \
         $(if $(LATEST_RELEASE), \
             $(info Found release tag: $(LATEST_RELEASE)), \
-            $(eval RETRY_COUNT := 5) \
+            $(info No need to retry.), \
+        \
+            $(info Initial fetch failed, retrying...) \
             $(eval LATEST_RELEASE := $(shell \
-                for i in $$(seq 1 $$(RETRY_COUNT)); do \
+                i=0; while [ $$i -lt 5 ]; do \
                     TAG=$$(wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
                         | grep '"tag_name"' \
                         | grep "$(1)" \
                         | head -n 1 \
                         | sed -E 's/.*"tag_name": "([^"]+)".*/\1/'); \
                     if [ -n "$$TAG" ]; then echo $$TAG; break; fi; \
-                    sleep 1; \
+                    i=$$((i+1)); sleep 1; \
                 done \
             )) \
         ) \
@@ -70,7 +72,6 @@ define fetch-releases-tag
         ) \
     )
 endef
-
 
 ifeq ($(call has, PREBUILT), 1)
     ifeq ($(call has, SYSTEM), 1)
