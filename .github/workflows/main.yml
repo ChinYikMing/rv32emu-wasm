@@ -250,6 +250,171 @@ jobs:
             .ci/riscv-tests.sh
       if: ${{ always() }}
 
+  macOS:
+    needs: [detect-code-related-file-changes]
+    if: needs.detect-code-related-file-changes.outputs.has_code_related_changes == 'true'
+    runs-on: macos-latest # M1 chip
+    steps:
+     - uses: actions/checkout@v4
+     - name: install-dependencies
+       run: |
+             brew install make dtc expect sdl2 sdl2_mixer bc p7zip
+             wget https://apt.llvm.org/llvm.sh
+             sudo chmod +x ./llvm.sh
+             sudo ./llvm.sh 18
+             # TODO: install xPack toolchain
+    - name: fetch artifact first to reduce HTTP requests
+      run: |
+            make artifact
+            make ENABLE_SYSTEM=1 artifact
+            make ENABLE_ARCH_TEST=1 artifact
+      if: ${{ always() }}
+    - name: default build with -g
+      run: |
+            make distclean
+            make OPT_LEVEL=-g -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -Og
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O0
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O1
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O2
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O3
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -Ofast
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -g
+      run: |
+            make distclean
+            make OPT_LEVEL=-g ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Og
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O0
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O1
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O2
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O3
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Ofast
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: check + tests
+      run: |
+            make distclean
+            make check -j$(sysctl -n hw.logicalcpu)
+            make tests -j$(sysctl -n hw.logicalcpu)
+            make misalign -j$(sysctl -n hw.logicalcpu)
+            make tool -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: diverse configurations
+      run: |
+            make distclean && make ENABLE_EXT_M=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_EXT_A=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_EXT_F=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_EXT_C=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_SDL=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zicsr=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_MOP_FUSION=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_BLOCK_CHAINING=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zba=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zbb=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zbc=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zbs=0 check -j$(sysctl -n hw.logicalcpu)
+            make distclean && make ENABLE_Zifencei=0 check -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+        #- name: misalignment test in block emulation
+        #  run: |
+        #        make -C tests/system/alignment/
+        #        make distclean && make ENABLE_ELF_LOADER=1 ENABLE_EXT_C=0 ENABLE_SYSTEM=1 misalign-in-blk-emu -j$(sysctl -n hw.logicalcpu)
+        #  if: ${{ always() }}
+        #- name: MMU test
+        #  run: |
+        #        make -C tests/system/mmu/
+        #        make distclean && make ENABLE_ELF_LOADER=1 ENABLE_SYSTEM=1 mmu-test -j$(sysctl -n hw.logicalcpu)
+        #  if: ${{ always() }}
+    - name: gdbstub test
+      run: |
+            make distclean && make ENABLE_GDBSTUB=1 gdbstub-test -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: JIT test
+      run: |
+            make ENABLE_JIT=1 clean && make ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_EXT_A=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_EXT_F=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_EXT_C=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_EXT_M=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zba=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zbb=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zbc=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zbs=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zicsr=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_Zifencei=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_MOP_FUSION=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_BLOCK_CHAINING=0 ENABLE_JIT=1 check -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: undefined behavior test
+      run: |
+            make clean && make ENABLE_UBSAN=1 check -j$(sysctl -n hw.logicalcpu)
+            make ENABLE_JIT=1 clean && make ENABLE_JIT=1 ENABLE_UBSAN=1 check -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: boot Linux kernel test
+      run: |
+            make distclean && make INITRD_SIZE=32 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu) && \
+            make ENABLE_SYSTEM=1 artifact -j$(sysctl -n hw.logicalcpu)
+            .ci/boot-linux.sh
+            make ENABLE_SYSTEM=1 clean
+      if: ${{ always() }}
+        #- name: Architecture test
+        #  run: |
+        #        .ci/riscv-tests.sh
+        #  if: ${{ always() }}
+    - name: boot Linux kernel test
+      run: |
+            make clean && make ENABLE_SYSTEM=1 && make ENABLE_SYSTEM=1 artifact -j$(sysctl -n hw.logicalcpu)
+            .ci/boot-linux.sh
+            make ENABLE_SYSTEM=1 clean
+
   host-arm64:
     needs: [detect-code-related-file-changes]
     if: needs.detect-code-related-file-changes.outputs.has_code_related_changes == 'true'
