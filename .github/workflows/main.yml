@@ -465,6 +465,8 @@ jobs:
              # Network quality may occasionally cause installing fail
              which gcc
              which clang
+             gcc --version
+             clang --version
              make artifact
              make ENABLE_SYSTEM=1 artifact
        if: ${{ always() }}
