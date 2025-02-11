@@ -5,7 +5,7 @@ OS_TYPE=$(uname -s)
 check_platform()
 {
     case "${MACHINE_TYPE}/${OS_TYPE}" in
-        x86_64/Linux | aarch64/Linux | arm64/Darwin)
+        x86_64/Linux | aarch64/Linux | x86_64/Darwin | arm64/Darwin)
             ;;
         *)
             echo "Unsupported platform: ${MACHINE_TYPE}/${OS_TYPE}"
