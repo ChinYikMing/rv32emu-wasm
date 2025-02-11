@@ -268,7 +268,6 @@ jobs:
             make artifact
             make ENABLE_SYSTEM=1 artifact
             make ENABLE_ARCH_TEST=1 artifact
-      if: ${{ always() }}
 
   host-arm64:
     needs: [detect-code-related-file-changes]
