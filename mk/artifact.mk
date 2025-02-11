@@ -42,33 +42,13 @@ SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(
 define fetch-releases-tag
     $(if $(wildcard $(BIN_DIR)/$(2)), \
         $(info $(3) is found. Skipping downloading.), \
-        $(eval LATEST_RELEASE := $(shell \
-            wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
-            | grep '"tag_name"' \
-            | grep "$(1)" \
-            | head -n 1 \
-            | sed -E 's/.*"tag_name": "([^"]+)".*/\1/' \
-        )) \
-        $(if $(LATEST_RELEASE), \
-            $(info Found release tag: $(LATEST_RELEASE)), \
-            $(info No need to retry.), \
-        \
-            $(info Initial fetch failed, retrying...) \
-            $(eval LATEST_RELEASE := $(shell \
-                i=0; while [ $$i -lt 5 ]; do \
-                    TAG=$$(wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
-                        | grep '"tag_name"' \
-                        | grep "$(1)" \
-                        | head -n 1 \
-                        | sed -E 's/.*"tag_name": "([^"]+)".*/\1/'); \
-                    if [ -n "$$TAG" ]; then echo $$TAG; break; fi; \
-                    i=$$((i+1)); sleep 5; \
-                done \
-            )) \
-        ) \
-        $(if $(LATEST_RELEASE), \
-            $(info Final release tag: $(LATEST_RELEASE)), \
-            $(error Fetching tag of latest releases failed after 5 attempts) \
+        $(eval LATEST_RELEASE := $(shell wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
+                                    | grep '"tag_name"' \
+                                    | grep "$(1)" \
+                                    | head -n 1 \
+                                    | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')) \
+        $(if $(LATEST_RELEASE),, \
+            $(error Fetching tag of latest releases failed) \
         ) \
     )
 endef
@@ -76,10 +56,12 @@ endef
 ifeq ($(call has, PREBUILT), 1)
     ifeq ($(call has, SYSTEM), 1)
         $(call fetch-releases-tag,Linux-Image,rv32emu-linux-image-prebuilt.tar.gz,Linux image)
+	$(info "fetch 1")
     else ifeq ($(call has, ARCH_TEST), 1)
         $(call fetch-releases-tag,sail,rv32emu-prebuilt-sail-$(HOST_PLATFORM),Sail model)
     else
         $(call fetch-releases-tag,ELF,rv32emu-prebuilt.tar.gz,Prebuilt benchmark)
+	$(info "fetch 2")
     endif
 
     PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)
