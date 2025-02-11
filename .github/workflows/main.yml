@@ -263,6 +263,82 @@ jobs:
              sudo chmod +x ./llvm.sh
              sudo ./llvm.sh 18
              # TODO: install xPack toolchain
+    - name: fetch artifact first to reduce HTTP requests
+      run: |
+            make artifact
+            make ENABLE_SYSTEM=1 artifact
+            make ENABLE_ARCH_TEST=1 artifact
+      if: ${{ always() }}
+    - name: default build with -g
+      run: |
+            make distclean
+            make OPT_LEVEL=-g -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -Og
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O0
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O1
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O2
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -O3
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build with -Ofast
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -g
+      run: |
+            make distclean
+            make OPT_LEVEL=-g ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Og
+      run: |
+            make distclean
+            make OPT_LEVEL=-Og ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O0
+      run: |
+            make distclean
+            make OPT_LEVEL=-O0 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O1
+      run: |
+            make distclean
+            make OPT_LEVEL=-O1 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O2
+      run: |
+            make distclean
+            make OPT_LEVEL=-O2 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -O3
+      run: |
+            make distclean
+            make OPT_LEVEL=-O3 ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
+    - name: default build for system emulation with -Ofast
+      run: |
+            make distclean
+            make OPT_LEVEL=-Ofast ENABLE_SYSTEM=1 -j$(sysctl -n hw.logicalcpu)
+      if: ${{ always() }}
 
   host-arm64:
     needs: [detect-code-related-file-changes]
