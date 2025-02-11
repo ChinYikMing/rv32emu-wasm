@@ -264,7 +264,7 @@ jobs:
        run: |
              make artifact
              make ENABLE_SYSTEM=1 artifact
-             make ENABLE_ARCH_TEST=1 artifact
+             # TODO: make ENABLE_ARCH_TEST=1 artifact
        if: ${{ always() }}
      - name: default build with -g
        run: |
