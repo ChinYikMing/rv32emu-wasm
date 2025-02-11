@@ -367,7 +367,7 @@ $(Q)true; \
 $(PRINTF) "Running $(3) ... "; \
 OUTPUT_FILE="$$(mktemp)"; \
 if (LC_ALL=C $(BIN) $(1) $(2) > "$$OUTPUT_FILE") && \
-   [ "$$(cat "$$OUTPUT_FILE" | $(LOG_FILTER) | $(4))" = "$(strip $(5))" ]; then \
+   [ "$$(cat "$$OUTPUT_FILE" | $(LOG_FILTER) | $(4))" = "$(5)" ]; then \
     $(call notice, [OK]); \
 else \
     $(PRINTF) "Failed.\n"; \
@@ -377,18 +377,18 @@ $(RM) "$$OUTPUT_FILE"
 endef
 
 check-hello: $(BIN)
-	$(call check-test, , $(OUT)/hello.elf, hello.elf, uniq, $(EXPECTED_hello))
+	$(call check-test, , $(OUT)/hello.elf, hello.elf, uniq,$(EXPECTED_hello))
 
 check: $(BIN) check-hello artifact
-	$(Q)$(foreach e, $(CHECK_ELF_FILES), $(call check-test, , $(OUT)/riscv32/$(e), $(e), uniq, $(EXPECTED_$(e))))
+	$(Q)$(foreach e, $(CHECK_ELF_FILES), $(call check-test, , $(OUT)/riscv32/$(e), $(e), uniq,$(EXPECTED_$(e))))
 
 EXPECTED_aes_sha1 = 89169ec034bec1c6bb2c556b26728a736d350ca3  -
 misalign: $(BIN) artifact
-	$(call check-test, -m, $(OUT)/riscv32/uaes, uaes.elf, $(SHA1SUM), $(EXPECTED_aes_sha1))
+	$(call check-test, -m, $(OUT)/riscv32/uaes, uaes.elf, $(SHA1SUM),$(EXPECTED_aes_sha1))
 
 EXPECTED_misalign = MISALIGNED INSTRUCTION FETCH TEST PASSED!
 misalign-in-blk-emu: $(BIN)
-	$(call check-test, , tests/system/alignment/misalign.elf, misalign.elf, tail -n 1, $(EXPECTED_misalign))
+	$(call check-test, , tests/system/alignment/misalign.elf, misalign.elf, tail -n 1,$(EXPECTED_misalign))
 
 EXPECTED_mmu = STORE PAGE FAULT TEST PASSED!
 mmu-test: $(BIN)
