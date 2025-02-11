@@ -11,12 +11,18 @@ if [[ "$#" == "0" ]] || [[ "$1" != "riscv-collab" ]]; then
     GCC_VER=14.2.0-3
     TOOLCHAIN_REPO=https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack
 
-    if [[ ${MACHINE_TYPE} == "x86_64" ]]; then
-        TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-linux-x64.tar.gz
-    elif [[ ${MACHINE_TYPE} == "aarch64" ]]; then
-        TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-linux-arm64.tar.gz
-    elif [[ ${MACHINE_TYPE} == "arm64" ]]; then
-        TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-darwin-arm64.tar.gz
+    if [[ ${OS_TYPE} == "Linux" ]]; then
+        if [[ ${MACHINE_TYPE} == "x86_64" ]]; then
+            TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-linux-x64.tar.gz
+        elif [[ ${MACHINE_TYPE} == "aarch64" ]]; then
+            TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-linux-arm64.tar.gz
+        fi
+    else
+        if [[ ${MACHINE_TYPE} == "x86_64" ]]; then
+            TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-darwin-x64.tar.gz
+        elif [[ ${MACHINE_TYPE} == "arm64" ]]; then
+            TOOLCHAIN_URL=${TOOLCHAIN_REPO}/releases/download/v${GCC_VER}/xpack-riscv-none-elf-gcc-${GCC_VER}-darwin-arm64.tar.gz
+        fi
     fi
 else
     UBUNTU_VER=`lsb_release -r | cut -f2`
