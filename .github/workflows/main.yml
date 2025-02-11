@@ -453,11 +453,11 @@ jobs:
              brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18
              .ci/riscv-toolchain-install.sh
              echo "${{ github.workspace }}/toolchain/bin" >> $GITHUB_PATH
-    - name: Install compiler
-      id: install_cc
-      uses: rlalik/setup-cpp-compiler@master
-      with:
-        compiler: ${{ matrix.compiler }}
+     - name: Install compiler
+       id: install_cc
+       uses: rlalik/setup-cpp-compiler@master
+       with:
+         compiler: ${{ matrix.compiler }}
      - name: fetch artifact first to reduce HTTP requests
        env:
          CC: ${{ steps.install_cc.outputs.cc }}
