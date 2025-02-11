@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ./common.sh
+source .ci/common.sh
 
 set -e -u -o pipefail
 
