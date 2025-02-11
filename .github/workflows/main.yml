@@ -443,7 +443,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-14, clang]
+        compiler: [gcc, clang]
     runs-on: macos-latest # M1 chip
     steps:
      - uses: actions/checkout@v4
@@ -463,7 +463,6 @@ jobs:
          CC: ${{ steps.install_cc.outputs.cc }}
        run: |
              # Network quality may occasionally cause installing fail
-             gcc --version
              make artifact
              make ENABLE_SYSTEM=1 artifact
        if: ${{ always() }}
