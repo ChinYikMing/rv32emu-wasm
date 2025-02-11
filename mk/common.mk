@@ -11,7 +11,7 @@ ifeq ($(UNAME_M),x86_64)
 else ifeq ($(UNAME_M),aarch64)
     HOST_PLATFORM := aarch64
 else ifeq ($(UNAME_M),arm64) # macOS
-    HOST_PLATFORM := aarch64
+    HOST_PLATFORM := arm64
 else
     $(error Unsupported platform.)
 endif

@@ -1,4 +1,5 @@
-# Expect host is Linux/x86_64, Linux/aarch64, macOS/arm64
+# Expect host is Linux/x86_64, Linux/aarch64, macOS/x86_64, macOS/arm64
+
 MACHINE_TYPE=$(uname -m)
 OS_TYPE=$(uname -s)
 
