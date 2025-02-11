@@ -53,6 +53,14 @@ define fetch-releases-tag
     )
 endef
 
+define a
+$(info "fetch 1")
+endef
+
+define b
+$(info "fetch 2")
+endef
+
 ifeq ($(call has, PREBUILT), 1)
     ifeq ($(call has, SYSTEM), 1)
         $(call fetch-releases-tag,Linux-Image,rv32emu-linux-image-prebuilt.tar.gz,Linux image)
@@ -61,6 +69,8 @@ ifeq ($(call has, PREBUILT), 1)
     else
         $(call fetch-releases-tag,ELF,rv32emu-prebuilt.tar.gz,Prebuilt benchmark)
     endif
+
+$(call a)
 
     PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)
 else
