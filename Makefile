@@ -392,7 +392,7 @@ misalign-in-blk-emu: $(BIN)
 
 EXPECTED_mmu = STORE PAGE FAULT TEST PASSED!
 mmu-test: $(BIN)
-	$(call check-test, , tests/system/mmu/vm.elf, vm.elf, tail -n 1, $(EXPECTED_mmu))
+	$(call check-test, , tests/system/mmu/vm.elf, vm.elf, tail -n 1,$(EXPECTED_mmu))
 
 # Non-trivial demonstration programs
 ifeq ($(call has, SDL), 1)
