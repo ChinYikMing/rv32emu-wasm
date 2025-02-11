@@ -443,7 +443,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-14.2.0, clang]
+        compiler: [gcc, clang]
     runs-on: macos-latest # M1 chip
     steps:
      - uses: actions/checkout@v4
