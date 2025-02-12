@@ -11,6 +11,7 @@ HIST_OBJS := \
 	utils.o \
 	emulate.o \
 	syscall.o \
+	syscall_sdl.o \
 	io.o \
 	log.o \
 	rv_histogram.o
