@@ -423,6 +423,8 @@ void dump_registers(riscv_t *rv, char *out_file_path);
 /* breakpoint exception handler */
 void ebreak_handler(riscv_t *rv);
 
+void rv_async_block_clear();
+
 /*
  * Trap might occurs during block emulation. For instance, page fault.
  * In order to handle trap, we have to escape from block and execute
