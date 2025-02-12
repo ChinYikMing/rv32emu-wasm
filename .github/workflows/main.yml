@@ -62,6 +62,8 @@ jobs:
              /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 -print-prog-name=ld
              /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 -print-prog-name=as
              /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 -print-prog-name=cc
+             echo "---------------------------------------------"
+             /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 -v
              ln -s /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 /usr/local/bin/gcc-13
        if: ${{ always() }}
      - name: fetch artifact first to reduce HTTP requests
