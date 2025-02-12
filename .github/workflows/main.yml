@@ -463,6 +463,8 @@ jobs:
        run: |
              echo "$(brew --prefix gcc@14)/bin"
              echo "$(brew --prefix gcc@14)/bin" >> $GITHUB_PATH
+             /opt/homebrew/opt/gcc/bin/gcc-14 --version
+             /opt/homebrew/opt/gcc/bin/gcc --version
              gcc --version
      - name: fetch artifact first to reduce HTTP requests
        env:
