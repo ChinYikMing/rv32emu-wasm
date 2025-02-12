@@ -81,15 +81,11 @@ ifeq ("$(CC_IS_EMCC)", "1")
 ifeq ($(call has, SDL), 1)
 $(warning LTO is not supported to build emscripten-port SDL using emcc.)
 else
-CFLAGS += -flto
 endif
 endif
 ifeq ("$(CC_IS_GCC)", "1")
-CFLAGS += -flto=auto
 endif
 ifeq ("$(CC_IS_CLANG)", "1")
-CFLAGS += -flto=thin -fsplit-lto-unit
-LDFLAGS += -flto=thin
 endif
 endif
 
