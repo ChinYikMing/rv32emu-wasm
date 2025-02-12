@@ -53,8 +53,8 @@ define fetch-releases-tag
     )
 endef
 
-ELF_LATEST_RELEASE := 2025.02.11-ELF-nightly
-Linux_LATEST_RELEASE := 2024.11.11-Linux-Image-nightly
+ELF_LATEST_RELEASE := 2025.02.11-ELF
+Linux_LATEST_RELEASE := 2024.11.11-Linux-Image
 Sail_LATEST_RELEASE := 2025.01.15-sail
 PREBUILT_BLOB_URL :=
 
