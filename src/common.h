@@ -191,7 +191,7 @@ static inline uint8_t ilog2(uint32_t x)
  * even without optimizations enabled.
  */
 #if defined(__has_attribute) && __has_attribute(musttail)
-#define MUST_TAIL
+#define MUST_TAIL __attribute__((musttail))
 #else
 #define MUST_TAIL
 #endif
