@@ -461,7 +461,7 @@ jobs:
      - name: Export gcc-14 to PATH due to the limitation of rlalik/setup-cpp-compiler@master on macOS
        id: export_gcc
        run: |
-             export PATH=/usr/local/bin:$PATH
+             echo "$(brew --prefix gcc@14)/bin" >> $GITHUB_PATH
      - name: fetch artifact first to reduce HTTP requests
        env:
          CC: ${{ steps.install_cc.outputs.cc }}
