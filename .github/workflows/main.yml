@@ -461,6 +461,8 @@ jobs:
      - name: Export gcc-14 to PATH due to the limitation of rlalik/setup-cpp-compiler@master on macOS
        id: export_gcc
        run: |
+             ls -l /opt/homebrew/opt/gcc/bin/gcc-14
+             ln -s /opt/homebrew/opt/gcc/bin/gcc-14 /usr/local/bin/gcc-14
              echo "/opt/homebrew/opt/gcc/bin" >> $GITHUB_PATH
      - name: fetch artifact first to reduce HTTP requests
        env:
