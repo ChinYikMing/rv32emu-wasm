@@ -42,27 +42,15 @@ SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(
 define fetch-releases-tag
     $(if $(wildcard $(BIN_DIR)/$(2)), \
         $(info $(3) is found. Skipping downloading.), \
-        $(shell mkdir -p /tmp/fetch_releases.lock && \
-            (echo "Lock acquired" > /tmp/fetch_releases.lock/lockfile) && \
-            $(eval latest_release := $(shell \
-                wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
-                | grep '"tag_name"' \
-                | grep "$(1)" \
-                | head -n 1 \
-                | sed -E "s/.*\"tag_name\": \"([^\"]+)\".*/\1/" )) \
-            $(shell rm -rf /tmp/fetch_releases.lock)) \
-        $(if $(latest_release),, \
+        $(eval LATEST_RELEASE := $(shell wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
+                                    | grep '"tag_name"' \
+                                    | grep "$(1)" \
+                                    | head -n 1 \
+                                    | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')) \
+        $(if $(LATEST_RELEASE),, \
             $(error Fetching tag of latest releases failed) \
         ) \
     )
-endef
-
-define a
-$(info "fetch 1")
-endef
-
-define b
-$(info "fetch 2")
 endef
 
 ifeq ($(call has, PREBUILT), 1)
@@ -73,8 +61,6 @@ ifeq ($(call has, PREBUILT), 1)
     else
         $(call fetch-releases-tag,ELF,rv32emu-prebuilt.tar.gz,Prebuilt benchmark)
     endif
-
-$(call a)
 
     PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(LATEST_RELEASE)
 else
