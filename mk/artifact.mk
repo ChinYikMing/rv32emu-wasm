@@ -36,10 +36,6 @@ SCIMARK2_SHA1 := de278c5b8cef84ab6dda41855052c7bfef919e36
 
 SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(BIN_DIR)/linux-image)
 
-ELF_LATEST_RELEASE := 2025.02.11-ELF-nightly
-Linux_LATEST_RELEASE := 2024.11.11-Linux-Image-nightly
-Sail_LATEST_RELEASE := 2025.01.15-sail
-
 # $(1): tag of GitHub releases
 # $(2): name of GitHub releases
 # $(3): name showing in terminal
@@ -57,16 +53,21 @@ define fetch-releases-tag
     )
 endef
 
+ELF_LATEST_RELEASE := 2025.02.11-ELF-nightly
+Linux_LATEST_RELEASE := 2024.11.11-Linux-Image-nightly
+Sail_LATEST_RELEASE := 2025.01.15-sail
+PREBUILT_BLOB_URL :=
+
 ifeq ($(call has, PREBUILT), 1)
     ifeq ($(call has, SYSTEM), 1)
         #$(call fetch-releases-tag,Linux-Image,rv32emu-linux-image-prebuilt.tar.gz,Linux image)
-        PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(Linux_LATEST_RELEASE)
+	PREBUILT_BLOB_URL := https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(Linux_LATEST_RELEASE)
     else ifeq ($(call has, ARCH_TEST), 1)
         #$(call fetch-releases-tag,sail,rv32emu-prebuilt-sail-$(HOST_PLATFORM),Sail model)
-        PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(Sail_LATEST_RELEASE)
+	PREBUILT_BLOB_URL := https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(Sail_LATEST_RELEASE)
     else
         #$(call fetch-releases-tag,ELF,rv32emu-prebuilt.tar.gz,Prebuilt benchmark)
-        PREBUILT_BLOB_URL = https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(ELF_LATEST_RELEASE)
+	PREBUILT_BLOB_URL := https://github.com/sysprog21/rv32emu-prebuilt/releases/download/$(ELF_LATEST_RELEASE)
     endif
 else
   # Since rv32emu only supports the dynamic binary translation of integer instruction in tiered compilation currently,
