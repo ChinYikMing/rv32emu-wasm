@@ -300,7 +300,7 @@ jobs:
      - name: install-dependencies
        run: |
              # Network quality may occasionally cause installing fail
-             brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18
+             brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18 e2fsprogs
              .ci/riscv-toolchain-install.sh
              echo "${{ github.workspace }}/toolchain/bin" >> $GITHUB_PATH
      - name: fetch artifact first to reduce HTTP requests
@@ -450,7 +450,7 @@ jobs:
      - name: install-dependencies
        run: |
              # Network quality may occasionally cause installing fail
-             brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18
+             brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18 e2fsprogs
              .ci/riscv-toolchain-install.sh
              echo "${{ github.workspace }}/toolchain/bin" >> $GITHUB_PATH
      - name: Install compiler
