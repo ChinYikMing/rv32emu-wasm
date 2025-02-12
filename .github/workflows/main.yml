@@ -58,8 +58,9 @@ jobs:
          compiler: ${{ matrix.compiler }}
      - name: Symlink gcc-14 due to the default /usr/local/bin/gcc links to system clang
        run: |
-             ls /opt/homebrew/opt/gcc-13 -alh
-             ln -s /opt/homebrew/opt/gcc-13 /usr/local/bin/gcc-13
+             ls -al /opt/homebrew/opt/gcc@13
+             ls -al /opt/homebrew/opt/gcc-13
+             ln -s /opt/homebrew/opt/gcc@13/bin/gcc /usr/local/bin/gcc-13
        if: ${{ always() }}
      - name: fetch artifact first to reduce HTTP requests
        env:
