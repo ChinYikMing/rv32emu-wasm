@@ -10,6 +10,9 @@ HIST_OBJS := \
 	mpool.o \
 	utils.o \
 	emulate.o \
+	syscall.o \
+	io.o \
+	log.o \
 	rv_histogram.o
 
 HIST_OBJS := $(addprefix $(OUT)/, $(HIST_OBJS))
