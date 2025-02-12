@@ -299,12 +299,12 @@ OBJS := \
 	io.o \
 	syscall.o \
 	emulate.o \
-	riscv.o \
 	log.o \
 	elf.o \
 	cache.o \
 	mpool.o \
 	$(OBJS_EXT) \
+	riscv.o \
 	main.o
 
 OBJS := $(addprefix $(OUT)/, $(OBJS))
