@@ -153,6 +153,7 @@ static void syscall_exit(riscv_t *rv)
 
     vm_attr_t *attr = PRIV(rv);
     attr->exit_code = rv_get_reg(rv, rv_reg_a0);
+    rv_log_warn("exit here");
 }
 
 /* brk(increment)
@@ -244,6 +245,11 @@ static void syscall_close(riscv_t *rv)
             /* success */
             rv_set_reg(rv, rv_reg_a0, 0);
         }
+    } else {
+	//printf("PC: 0x%x\n", rv->PC);
+	//printf("fd: %u\n", fd);
+    	//rv_log_error("Error here");
+	//printf("exit code: %d\n", PRIV(rv)->exit_code);
     }
 
     /* success */
