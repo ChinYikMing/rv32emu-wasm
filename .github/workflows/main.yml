@@ -75,7 +75,7 @@ jobs:
              make check -j$(sysctl -n hw.logicalcpu)
              make tests -j$(sysctl -n hw.logicalcpu)
              make misalign -j$(sysctl -n hw.logicalcpu)
-             make clean
+             make distclean
              make tool -j$(sysctl -n hw.logicalcpu)
        if: ${{ always() }}
 
