@@ -321,7 +321,7 @@ endif
 $(OUT)/%.o: src/%.c $(deps_emcc)
 	$(Q)mkdir -p $(shell dirname $@)
 	$(VECHO) "  CC\t$@\n"
-	$(Q)$(CC) -o $@ $(CFLAGS) $(CFLAGS_emcc) -c -MMD -MF $@.d $<
+	$(Q)$(CC) $(CFLAGS)  -o $@ $(CFLAGS) $(CFLAGS_emcc) -c -MMD -MF $@.d $<
 
 $(BIN): $(OBJS) $(DEV_OBJS)
 	$(VECHO) "  LD\t$@\n"
