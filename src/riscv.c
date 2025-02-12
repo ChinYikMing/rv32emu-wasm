@@ -366,7 +366,7 @@ static void capture_keyboard_input()
  *
  */
 extern riscv_t *rv;
-static void rv_async_block_clear()
+void rv_async_block_clear()
 {
 #if !RV32_HAS(JIT)
     if (rv && rv->block_map.size)
