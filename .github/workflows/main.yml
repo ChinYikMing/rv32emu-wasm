@@ -59,6 +59,7 @@ jobs:
      - name: Symlink gcc-14 due to the default /usr/local/bin/gcc links to system clang
        run: |
              ls -al /opt/homebrew/opt/gcc@13
+             ls ../Cellar/gcc@13/13.3.0
              readlink /opt/homebrew/opt/gcc@13
              ln -s /opt/homebrew/opt/gcc@13/bin/gcc /usr/local/bin/gcc-13
        if: ${{ always() }}
