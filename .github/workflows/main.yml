@@ -60,7 +60,7 @@ jobs:
        run: |
              ls -al /opt/homebrew/Cellar/gcc@13/13.3.0/
              ls -al /opt/homebrew/Cellar/gcc@13/13.3.0/bin
-             ln -s /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc /usr/local/bin/gcc-13
+             ln -s /opt/homebrew/Cellar/gcc@13/13.3.0/bin/gcc-13 /usr/local/bin/gcc-13
        if: ${{ always() }}
      - name: fetch artifact first to reduce HTTP requests
        env:
