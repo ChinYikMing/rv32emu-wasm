@@ -463,6 +463,7 @@ jobs:
        run: |
              echo "$(brew --prefix gcc@14)/bin"
              echo "$(brew --prefix gcc@14)/bin" >> $GITHUB_PATH
+             gcc --version
      - name: fetch artifact first to reduce HTTP requests
        env:
          CC: ${{ steps.install_cc.outputs.cc }}
