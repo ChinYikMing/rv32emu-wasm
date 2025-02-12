@@ -365,16 +365,6 @@ static void capture_keyboard_input()
  * global RISC-V instance in main.c with external linkage.
  *
  */
-extern riscv_t *rv;
-static void rv_async_block_clear()
-{
-#if !RV32_HAS(JIT)
-    if (rv && rv->block_map.size)
-        block_map_clear(rv);
-#else  /* TODO: JIT mode */
-    return;
-#endif /* !RV32_HAS(JIT) */
-}
 
 riscv_t *rv_create(riscv_user_t rv_attr)
 {
@@ -384,7 +374,7 @@ riscv_t *rv_create(riscv_user_t rv_attr)
     assert(rv);
 
     /* register cleaning callback for CTRL+a+x exit */
-    atexit(rv_async_block_clear);
+    //atexit(rv_async_block_clear);
 
     /* copy over the attr */
     rv->data = rv_attr;
