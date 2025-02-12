@@ -296,6 +296,8 @@ jobs:
     if: needs.detect-code-related-file-changes.outputs.has_code_related_changes == 'true'
     runs-on: macos-13 # Intel chip
     steps:
+     - name: Tune GitHub-hosted runner network
+       uses: smorimoto/tune-github-hosted-runner-network@v1
      - uses: actions/checkout@v4
      - name: install-dependencies
        run: |
@@ -446,6 +448,8 @@ jobs:
         compiler: [gcc-14, clang]
     runs-on: macos-latest # M1 chip
     steps:
+     - name: Tune GitHub-hosted runner network
+       uses: smorimoto/tune-github-hosted-runner-network@v1
      - uses: actions/checkout@v4
      - name: install-dependencies
        run: |
