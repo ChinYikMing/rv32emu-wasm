@@ -312,7 +312,6 @@ jobs:
        with:
          compiler: ${{ matrix.compiler }}
      - name: Symlink gcc-14 due to the default /usr/local/bin/gcc links to system's clang
-       id: symbolic link gcc
        run: |
              ln -s /opt/homebrew/opt/gcc/bin/gcc-14 /usr/local/bin/gcc-14
      - name: fetch artifact first to reduce HTTP requests
