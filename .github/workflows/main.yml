@@ -470,6 +470,7 @@ jobs:
        env:
          CC: ${{ steps.install_cc.outputs.cc }}
        run: |
+             echo $CC
              # Network quality may occasionally cause installing fail
              make artifact
              make ENABLE_SYSTEM=1 artifact
