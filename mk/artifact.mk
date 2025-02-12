@@ -42,11 +42,12 @@ SHELL_HACK := $(shell mkdir -p $(BIN_DIR)/linux-x86-softfp $(BIN_DIR)/riscv32 $(
 define fetch-releases-tag
     $(if $(wildcard $(BIN_DIR)/$(2)), \
         $(info $(3) is found. Skipping downloading.), \
-	$(eval LATEST_RELEASE := $(shell curl -s https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases \
-                               | grep '"tag_name"' \
-                               | grep "$(1)" \
-                               | head -n 1 \
-                               | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')) \
+        $(eval LATEST_RELEASE := $(shell wget -q https://api.github.com/repos/sysprog21/rv32emu-prebuilt/releases -O- \
+                                    | grep '"tag_name"' \
+                                    | grep "$(1)" \
+                                    | head -n 1 \
+                                    | sed -E 's/.*"tag_name": "([^"]+)".*/\1/')) \
+	sleep 3;\
         $(if $(LATEST_RELEASE),, \
             $(error Fetching tag of latest releases failed) \
         ) \
