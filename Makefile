@@ -299,12 +299,12 @@ OBJS := \
 	io.o \
 	syscall.o \
 	emulate.o \
+	riscv.o \
 	log.o \
 	elf.o \
 	cache.o \
 	mpool.o \
 	$(OBJS_EXT) \
-	riscv.o \
 	main.o
 
 OBJS := $(addprefix $(OUT)/, $(OBJS))
@@ -321,7 +321,7 @@ endif
 $(OUT)/%.o: src/%.c $(deps_emcc)
 	$(Q)mkdir -p $(shell dirname $@)
 	$(VECHO) "  CC\t$@\n"
-	$(Q)$(CC) $(CFLAGS)  -o $@ $(CFLAGS) $(CFLAGS_emcc) -c -MMD -MF $@.d $<
+	$(Q)$(CC) -o $@ $(CFLAGS) $(CFLAGS_emcc) -c -MMD -MF $@.d $<
 
 $(BIN): $(OBJS) $(DEV_OBJS)
 	$(VECHO) "  LD\t$@\n"
