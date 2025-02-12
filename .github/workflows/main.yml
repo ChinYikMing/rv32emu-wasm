@@ -308,6 +308,22 @@ jobs:
              brew install make dtc expect sdl2 sdl2_mixer bc p7zip llvm@18 e2fsprogs
              .ci/riscv-toolchain-install.sh
              echo "${{ github.workspace }}/toolchain/bin" >> $GITHUB_PATH
+     - name: Install compiler
+       id: install_cc
+       uses: rlalik/setup-cpp-compiler@master
+       with:
+         compiler: ${{ matrix.compiler }}
+     - name: Symlink gcc-14 due to the default /usr/local/bin/gcc links to system clang
+       run: |
+             ln -s /opt/homebrew/opt/gcc/bin/gcc-14 /usr/local/bin/gcc-14
+       if: ${{ always() }}
+     - name: fetch artifact first to reduce HTTP requests
+       env:
+         CC: ${{ steps.install_cc.outputs.cc }}
+       run: |
+             make artifact
+             make ENABLE_SYSTEM=1 artifact
+       if: ${{ always() }}
      - name: check + tests
        env:
          CC: ${{ steps.install_cc.outputs.cc }}
@@ -316,7 +332,7 @@ jobs:
              make check -j$(sysctl -n hw.logicalcpu)
              make tests -j$(sysctl -n hw.logicalcpu)
              make misalign -j$(sysctl -n hw.logicalcpu)
-             make VERBOSE=1 tool -j$(sysctl -n hw.logicalcpu)
+             make tool -j$(sysctl -n hw.logicalcpu)
        if: ${{ always() }}
 
   coding-style:
